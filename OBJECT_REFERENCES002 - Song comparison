@@ -1,0 +1,148 @@
+import java.util.Objects; // Import for Objects.hash() and potentially Objects.equals()
+import java.util.Scanner;
+
+/**
+ * Represents a Song with a name, author, and duration.
+ */
+class Song {
+    // Attributes - making them private for good encapsulation
+    private String name;
+    private String author;
+    private int duration; // in seconds
+
+    /**
+     * Constructor to initialize a Song object.
+     * @param name The name of the song.
+     * @param author The author of the song.
+     * @param duration The duration of the song in seconds.
+     */
+    public Song(String name, String author, int duration) {
+        this.name = name;
+        this.author = author;
+        this.duration = duration;
+    }
+
+    // --- Getters (Optional for this problem, but good practice) ---
+    public String getName() {
+        return name;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    /**
+     * Compares this Song object to another object for equality.
+     * Two songs are considered equal if their name, author, and duration are all identical.
+     * This method overrides the default equals() from the Object class.
+     *
+     * @param o The object to compare with this Song.
+     * @return true if the given object is a Song and has the same name, author, and duration; false otherwise.
+     */
+    @Override
+    public boolean equals(Object o) {
+        // 1. Check if the references are the same (quick check)
+        if (this == o) return true;
+
+        // 2. Check if the other object is null or of a different class
+        if (o == null || getClass() != o.getClass()) return false;
+
+        // 3. Cast the other object to a Song object
+        Song otherSong = (Song) o;
+
+        // 4. Compare all relevant fields: duration, name, and author
+        // Use == for primitive types (int)
+        // Use .equals() for comparing objects like String (crucial!)
+        return this.duration == otherSong.duration &&
+               Objects.equals(this.name, otherSong.name) &&   // Use Objects.equals for null-safety
+               Objects.equals(this.author, otherSong.author); // Use Objects.equals for null-safety
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     * This method is overridden to be consistent with the overridden equals() method.
+     * If two objects are equal according to equals(), they must have the same hash code.
+     *
+     * @return A hash code value for this Song object.
+     */
+    @Override
+    public int hashCode() {
+        // Use Objects.hash to generate a hash code based on the fields used in equals()
+        return Objects.hash(name, author, duration);
+    }
+
+    // Optional: toString() method for debugging or printing song info
+    @Override
+    public String toString() {
+        return "Song[name=" + name + ", author=" + author + ", duration=" + duration + "]";
+    }
+}
+
+/**
+ * Main class to handle input, create Song objects, compare them, and print results.
+ */
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of pairs to compare
+        int n = Integer.parseInt(scanner.nextLine());
+
+        // Loop n times for each pair of songs
+        for (int i = 0; i < n; i++) {
+            // --- Read the first song ---
+            String line1 = scanner.nextLine();
+            String[] parts1 = line1.split(" "); // Split by space
+            // Ensure we have exactly 3 parts before proceeding
+            if (parts1.length == 3) {
+                String name1 = parts1[0];
+                String author1 = parts1[1];
+                int duration1 = 0;
+                try {
+                     duration1 = Integer.parseInt(parts1[2]);
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parsing duration for song 1 on pair " + (i+1));
+                    // Handle error appropriately, maybe skip this pair or print an error message
+                    // For this problem, we might assume valid input based on constraints
+                }
+                Song song1 = new Song(name1, author1, duration1);
+
+                // --- Read the second song ---
+                String line2 = scanner.nextLine();
+                String[] parts2 = line2.split(" ");
+                 if (parts2.length == 3) {
+                    String name2 = parts2[0];
+                    String author2 = parts2[1];
+                    int duration2 = 0;
+                     try {
+                         duration2 = Integer.parseInt(parts2[2]);
+                     } catch (NumberFormatException e) {
+                        System.err.println("Error parsing duration for song 2 on pair " + (i+1));
+                     }
+
+                    Song song2 = new Song(name2, author2, duration2);
+
+                    // --- Compare and print the result ---
+                    // The equals method we defined in the Song class is automatically used here.
+                    System.out.println(song1.equals(song2));
+                 } else {
+                      System.err.println("Invalid input format for song 2 on pair " + (i+1));
+                      // Skip comparison or handle error
+                 }
+
+            } else {
+                 System.err.println("Invalid input format for song 1 on pair " + (i+1));
+                 // If song 1 is invalid, we likely need to consume the line for song 2 as well
+                 if (scanner.hasNextLine()) scanner.nextLine();
+                 // Skip comparison or handle error
+            }
+
+        }
+
+        scanner.close(); // Close the scanner
+    }
+}
