@@ -1,0 +1,73 @@
+/**
+ * Lớp Dog đại diện cho một chú chó với các thông tin cơ bản.
+ */
+class Dog {
+    // Thuộc tính (Fields/Instance Variables) - nên để private để đảm bảo tính đóng gói
+    private String name;
+    private String breed;
+    private int age;
+
+    /**
+     * Phương thức setName (Setter): Gán giá trị tên cho chú chó.
+     * @param name Tên mới của chú chó.
+     */
+    public void setName(String name) {
+        // this.name tham chiếu đến thuộc tính 'name' của đối tượng Dog hiện tại
+        // name (ở vế phải) là tham số được truyền vào phương thức
+        this.name = name;
+    }
+
+    /**
+     * Phương thức setBreed (Setter): Gán giống loài cho chú chó.
+     * @param breed Giống loài mới của chú chó.
+     */
+    public void setBreed(String breed) {
+        this.breed = breed;
+    }
+
+    /**
+     * Phương thức setAge (Setter): Gán tuổi cho chú chó.
+     * @param age Tuổi mới của chú chó.
+     */
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    /**
+     * Phương thức printDogDetail: In thông tin chi tiết của chú chó ra màn hình
+     * theo định dạng yêu cầu.
+     */
+    public void printDogDetail() {
+        System.out.println("Name:" + this.name + "--Breed:" + this.breed + "--Age:" + this.age);
+        // Cũng có thể viết là:
+        // System.out.println("Name:" + name + "--Breed:" + breed + "--Age:" + age);
+        // vì trong ngữ cảnh này không có biến cục bộ nào trùng tên với thuộc tính.
+    }
+
+    // Lưu ý: Bài này không yêu cầu Getters (như getName(), getAge(),...)
+    // và cũng không yêu cầu Constructor (hàm khởi tạo).
+    // Java sẽ tự động cung cấp một constructor mặc định không tham số khi không có constructor nào khác được định nghĩa.
+}
+
+/**
+ * Lớp Main chứa phương thức main để chạy chương trình.
+ */
+public class Main {
+
+    /**
+     * Phương thức main - điểm bắt đầu thực thi chương trình.
+     * @param args Tham số dòng lệnh (không sử dụng trong bài này).
+     */
+    public static void main(String[] args) {
+        // 1. Tạo một đối tượng (instance) mới của lớp Dog
+        Dog myDog = new Dog();
+
+        // 2. Gán các giá trị cụ thể cho đối tượng myDog bằng cách gọi các phương thức setter
+        myDog.setName("Micky");
+        myDog.setBreed("Husky");
+        myDog.setAge(12);
+
+        // 3. Gọi phương thức printDogDetail() của đối tượng myDog để in thông tin
+        myDog.printDogDetail();
+    }
+}
