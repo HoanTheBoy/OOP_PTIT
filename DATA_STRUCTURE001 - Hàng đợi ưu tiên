@@ -1,0 +1,163 @@
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Scanner;
+
+/**
+ * Represents a student with name, CGPA, and ID.
+ */
+class Student {
+    private String name;
+    private double cgpa;
+    private int id;
+
+    /**
+     * Constructor for the Student class.
+     *
+     * @param name Name of the student.
+     * @param cgpa CGPA of the student.
+     * @param id   Unique ID of the student.
+     */
+    public Student(String name, double cgpa, int id) {
+        this.name = name;
+        this.cgpa = cgpa;
+        this.id = id;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    public double getCgpa() {
+        return cgpa;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    // Optional: toString for debugging
+    @Override
+    public String toString() {
+        return "Student[name=" + name + ", cgpa=" + cgpa + ", id=" + id + "]";
+    }
+}
+
+/**
+ * Contains the logic for managing the priority queue of students based on events.
+ */
+class Priorities {
+
+    /**
+     * Processes a list of events (ENTER, SERVED) and returns the list of
+     * students remaining in the priority queue, ordered by priority.
+     *
+     * @param events A list of strings, each representing an event.
+     * @return A list of Student objects remaining in the queue, ordered from
+     *         highest priority to lowest. Returns an empty list if no students remain.
+     */
+    public List<Student> getStudents(List<String> events) {
+        // Define the Comparator for Student priority
+        Comparator<Student> studentComparator = new Comparator<Student>() {
+            @Override
+            public int compare(Student s1, Student s2) {
+                // 1. Compare by CGPA (higher CGPA first)
+                // Double.compare returns negative if d1 < d2, positive if d1 > d2.
+                // We want higher CGPA first, so compare s2.cgpa with s1.cgpa.
+                int cgpaCompare = Double.compare(s2.getCgpa(), s1.getCgpa());
+                if (cgpaCompare != 0) {
+                    return cgpaCompare;
+                }
+
+                // 2. If CGPA is the same, compare by name (alphabetical order)
+                int nameCompare = s1.getName().compareTo(s2.getName());
+                if (nameCompare != 0) {
+                    return nameCompare;
+                }
+
+                // 3. If CGPA and name are the same, compare by ID (lower ID first)
+                // Integer.compare returns negative if i1 < i2, positive if i1 > i2.
+                return Integer.compare(s1.getId(), s2.getId());
+            }
+        };
+
+        // Create the PriorityQueue using the custom comparator
+        // The comparator ensures that poll() retrieves the highest priority student
+        PriorityQueue<Student> priorityQueue = new PriorityQueue<>(studentComparator);
+
+        // Process each event
+        for (String event : events) {
+            String[] parts = event.split(" ");
+            String command = parts[0];
+
+            if (command.equals("ENTER")) {
+                if (parts.length == 4) {
+                    try {
+                        String name = parts[1];
+                        double cgpa = Double.parseDouble(parts[2]);
+                        int id = Integer.parseInt(parts[3]);
+                        Student student = new Student(name, cgpa, id);
+                        priorityQueue.add(student);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing number in ENTER event: " + event);
+                        // Decide how to handle parse errors, e.g., skip the event
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                         System.err.println("Invalid format for ENTER event: " + event);
+                    }
+                } else {
+                     System.err.println("Invalid format for ENTER event: " + event);
+                }
+            } else if (command.equals("SERVED")) {
+                // Remove the highest priority student if the queue is not empty
+                if (!priorityQueue.isEmpty()) {
+                    priorityQueue.poll(); // poll() retrieves and removes the head (highest priority)
+                }
+            }
+            // Ignore any other malformed commands
+        }
+
+        // After processing all events, collect the remaining students
+        List<Student> remainingStudents = new ArrayList<>();
+        while (!priorityQueue.isEmpty()) {
+            // Poll students one by one; they will come out in priority order
+            remainingStudents.add(priorityQueue.poll());
+        }
+
+        return remainingStudents;
+    }
+}
+
+/**
+ * Main class to read input, process events, and print the output.
+ */
+public class Main {
+    private final static Scanner scan = new Scanner(System.in);
+    private final static Priorities priorities = new Priorities(); // Create an instance of Priorities
+
+    public static void main(String[] args) {
+        int totalEvents = Integer.parseInt(scan.nextLine()); // Read number of events
+        List<String> events = new ArrayList<>();
+
+        // Read all event lines
+        while (totalEvents-- != 0) {
+            String event = scan.nextLine();
+            events.add(event);
+        }
+
+        // Get the list of remaining students, ordered by priority
+        List<Student> students = priorities.getStudents(events);
+
+        // Print the results
+        if (students.isEmpty()) {
+            System.out.println("EMPTY");
+        } else {
+            // Print the name of each remaining student
+            for (Student st : students) {
+                System.out.println(st.getName());
+            }
+        }
+        scan.close(); // Close the scanner
+    }
+}
