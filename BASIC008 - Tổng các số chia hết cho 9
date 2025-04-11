@@ -1,0 +1,26 @@
+public class Main {
+
+    public static void main(String[] args) {
+
+        int sum = 0; // Biến để lưu tổng các số chia hết cho 9
+
+        // In dòng tiêu đề
+        System.out.println("Numbers between 100 and 200, divisible by 9:");
+
+        // Duyệt qua các số từ 100 đến 200 (bao gồm cả 200)
+        for (int i = 100; i <= 200; i++) {
+            // Kiểm tra xem số hiện tại 'i' có chia hết cho 9 hay không
+            // Toán tử % (modulo) trả về phần dư của phép chia.
+            // Nếu phần dư bằng 0, nghĩa là số đó chia hết.
+            if (i % 9 == 0) {
+                // Nếu chia hết cho 9, in số đó ra màn hình
+                System.out.println(i);
+                // Cộng số đó vào biến tổng 'sum'
+                sum = sum + i; // Hoặc có thể viết ngắn gọn là: sum += i;
+            }
+        }
+
+        // Sau khi vòng lặp kết thúc, in ra tổng đã tính được
+        System.out.println(sum);
+    }
+}
