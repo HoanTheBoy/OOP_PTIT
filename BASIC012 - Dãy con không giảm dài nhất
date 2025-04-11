@@ -1,0 +1,107 @@
+import java.util.Scanner;
+import java.util.Arrays; // Mặc dù không dùng trực tiếp trong logic chính, Arrays hữu ích cho việc debug
+
+public class Main { // Đổi tên lớp thành Main theo yêu cầu của PTIT OJ
+
+    /**
+     * Hàm tìm độ dài dãy con liên tiếp không giảm dài nhất.
+     *
+     * @param a Mảng số nguyên đầu vào.
+     * @return Độ dài của dãy con không giảm dài nhất.
+     */
+    public static int findLongestNonDecreasingSubarray(int[] a) {
+        int n = a.length;
+
+        // Trường hợp dãy rỗng
+        if (n == 0) {
+            return 0;
+        }
+        // Trường hợp dãy chỉ có 1 phần tử, dãy con dài nhất là chính nó
+        if (n == 1) {
+            return 1;
+        }
+
+        int maxLength = 1;      // Lưu độ dài lớn nhất tìm được tính đến hiện tại (khởi tạo là 1 vì ít nhất có 1 phần tử)
+        int currentLength = 1;  // Lưu độ dài của dãy con không giảm HIỆN TẠI đang xét (khởi tạo là 1)
+
+        // Duyệt mảng từ phần tử thứ hai (index 1)
+        for (int i = 1; i < n; i++) {
+            // So sánh phần tử hiện tại với phần tử ngay trước nó
+            if (a[i] >= a[i - 1]) {
+                // Nếu không giảm (lớn hơn hoặc bằng), dãy con hiện tại được kéo dài thêm 1
+                currentLength++;
+            } else {
+                // Nếu giảm (nhỏ hơn), dãy con không giảm hiện tại bị đứt
+                // Đặt lại độ dài hiện tại về 1 (vì phần tử a[i] bắt đầu một dãy con mới có độ dài 1)
+                currentLength = 1;
+            }
+
+            // Sau mỗi bước (dù dãy con tiếp tục hay bị đứt),
+            // so sánh độ dài hiện tại với độ dài lớn nhất đã tìm thấy
+            // và cập nhật nếu độ dài hiện tại lớn hơn.
+            if (currentLength > maxLength) {
+                maxLength = currentLength;
+            }
+            // Cách viết ngắn gọn hơn: maxLength = Math.max(maxLength, currentLength);
+        }
+
+        // Trả về độ dài lớn nhất tìm được sau khi duyệt hết mảng
+        return maxLength;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Đọc số lượng test cases
+        int numberOfTestCases = scanner.nextInt();
+        scanner.nextLine(); // Tiêu thụ ký tự newline còn lại sau nextInt()
+
+        // Lặp qua từng test case
+        while (numberOfTestCases > 0) {
+            // Đọc cả dòng chứa dãy số
+            String line = scanner.nextLine();
+
+            // Tách các số trong dòng dựa trên khoảng trắng
+            // trim() loại bỏ khoảng trắng thừa ở đầu/cuối
+            // split("\\s+") tách bằng một hoặc nhiều ký tự khoảng trắng
+            String[] numberStrings = line.trim().split("\\s+");
+
+            // Xử lý trường hợp dòng đầu vào trống hoặc chỉ chứa khoảng trắng
+            if (numberStrings.length == 0 || (numberStrings.length == 1 && numberStrings[0].isEmpty())) {
+                 System.out.println(0); // In ra 0 nếu dãy rỗng
+                 numberOfTestCases--;   // Giảm bộ đếm test case
+                 continue;             // Chuyển sang test case tiếp theo
+            }
+
+
+            // Tạo mảng số nguyên để lưu trữ các số
+            int[] numbers = new int[numberStrings.length];
+            try {
+                 // Chuyển đổi từng chuỗi số thành số nguyên
+                 for (int i = 0; i < numberStrings.length; i++) {
+                    numbers[i] = Integer.parseInt(numberStrings[i]);
+                 }
+            } catch (NumberFormatException e) {
+                 // Xử lý lỗi nếu input không phải số (thường đề bài đảm bảo input hợp lệ)
+                 System.err.println("Lỗi định dạng số trong test case: " + line);
+                 // Trong trường hợp lỗi, có thể in 0 hoặc xử lý khác tùy yêu cầu
+                 System.out.println(0);
+                 numberOfTestCases--;
+                 continue;
+            }
+
+
+            // Gọi hàm để tìm độ dài dãy con không giảm dài nhất
+            int result = findLongestNonDecreasingSubarray(numbers);
+
+            // In kết quả
+            System.out.println(result);
+
+            // Giảm bộ đếm test case
+            numberOfTestCases--;
+        }
+
+        // Đóng Scanner
+        scanner.close();
+    }
+}
