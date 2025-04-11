@@ -1,0 +1,41 @@
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // 1. Đọc số lượng dòng văn bản (n)
+        int n = Integer.parseInt(scanner.nextLine());
+
+        // 2. Vòng lặp để xử lý n dòng tiếp theo
+        for (int i = 0; i < n; i++) {
+            // Đọc dòng văn bản hiện tại
+            String line = scanner.nextLine();
+
+            // Sử dụng StringBuilder để nối các chữ cái viết hoa hiệu quả
+            StringBuilder initialsBuilder = new StringBuilder();
+
+            // 3. Duyệt qua từng ký tự trong dòng văn bản
+            for (int j = 0; j < line.length(); j++) {
+                char currentChar = line.charAt(j);
+
+                // 4. Kiểm tra xem ký tự có phải là chữ cái viết hoa không
+                // Character.isUpperCase() kiểm tra xem ký tự có phải là uppercase letter hay không
+                if (Character.isUpperCase(currentChar)) {
+                    // Nếu là chữ viết hoa, nối nó vào StringBuilder
+                    initialsBuilder.append(currentChar);
+                }
+            }
+
+            // 5. Chuyển StringBuilder thành String
+            String initials = initialsBuilder.toString();
+
+            // 6. In kết quả theo định dạng yêu cầu
+            System.out.println("My initials are: " + initials);
+        }
+
+        // Đóng Scanner sau khi sử dụng xong
+        scanner.close();
+    }
+}
