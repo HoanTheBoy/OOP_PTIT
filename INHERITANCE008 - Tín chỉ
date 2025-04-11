@@ -1,0 +1,122 @@
+import java.util.ArrayList; // Không cần thiết cho bài này, có thể xóa
+import java.util.List;     // Không cần thiết cho bài này, có thể xóa
+
+/**
+ * Lớp Person (Người) đại diện cho một người nói chung với tên và địa chỉ.
+ * Đây là lớp cha (superclass) cho lớp Student.
+ */
+class Person {
+    // Thuộc tính tên của người, được bảo vệ (protected) để lớp con có thể truy cập trực tiếp nếu cần,
+    // hoặc private nếu chỉ truy cập qua getter/setter (toString dùng được dù private)
+    private String name;
+    // Thuộc tính địa chỉ của người
+    private String address;
+
+    /**
+     * Hàm khởi tạo (constructor) cho lớp Person.
+     * @param name Tên của người.
+     * @param address Địa chỉ của người.
+     */
+    public Person(String name, String address) {
+        this.name = name;
+        this.address = address;
+    }
+
+    /**
+     * Phương thức lấy tên của người. (Không bắt buộc dùng trong bài này nhưng là chuẩn)
+     * @return Tên của người.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Phương thức lấy địa chỉ của người. (Không bắt buộc dùng trong bài này nhưng là chuẩn)
+     * @return Địa chỉ của người.
+     */
+    public String getAddress() {
+        return address;
+    }
+
+    /**
+     * Phương thức toString trả về biểu diễn chuỗi của đối tượng Person.
+     * Định dạng: "Tên - Địa chỉ"
+     * @return Chuỗi thông tin của người.
+     */
+    @Override // Ghi đè phương thức toString từ lớp Object
+    public String toString() {
+        return this.name + " - " + this.address;
+    }
+}
+
+/**
+ * Lớp Student (Sinh viên) kế thừa từ lớp Person.
+ * Bổ sung thêm thông tin về số tín chỉ (credits).
+ */
+class Student extends Person {
+    // Thuộc tính lưu số tín chỉ của sinh viên, khởi tạo bằng 0
+    private int credits;
+
+    /**
+     * Hàm khởi tạo (constructor) cho lớp Student.
+     * Gọi hàm khởi tạo của lớp cha (Person) để thiết lập tên và địa chỉ.
+     * @param name Tên của sinh viên.
+     * @param address Địa chỉ của sinh viên.
+     */
+    public Student(String name, String address) {
+        // Gọi constructor của lớp cha (Person) để khởi tạo name và address
+        super(name, address);
+        // Khởi tạo số tín chỉ ban đầu là 0
+        this.credits = 0;
+    }
+
+    /**
+     * Phương thức study(): Mô phỏng hành động học của sinh viên.
+     * Mỗi lần gọi phương thức này, số tín chỉ (credits) sẽ tăng lên 1.
+     */
+    public void study() {
+        this.credits++; // Tăng giá trị của biến credits lên 1
+    }
+
+    /**
+     * Phương thức credits(): Trả về số tín chỉ hiện tại của sinh viên.
+     * @return Số tín chỉ (credits) của sinh viên.
+     */
+    public int credits() {
+        return this.credits;
+    }
+
+    // Ghi chú: Lớp Student không cần định nghĩa lại phương thức toString()
+    // vì nó sẽ kế thừa phương thức toString() từ lớp Person,
+    // và theo yêu cầu ví dụ, chỉ cần in ra tên và địa chỉ.
+    // Nếu muốn in cả tín chỉ, ta sẽ viết lại (override) toString() ở đây.
+}
+
+/**
+ * Lớp Main chứa hàm main để chạy chương trình.
+ */
+public class Main {
+    /**
+     * Hàm main thực thi các yêu cầu của đề bài.
+     * @param args Tham số dòng lệnh (không sử dụng trong bài này).
+     */
+    public static void main(String[] args) {
+        // 1. Tạo một đối tượng Student với tên và địa chỉ cụ thể
+        Student ollie = new Student("Ollie", "6381 Hollywood Blvd. Los Angeles 90028");
+
+        // 2. In ra thông tin của sinh viên đó (sử dụng phương thức toString() được kế thừa từ Person)
+        // System.out.println(ollie.toString()); // Cách gọi tường minh
+        System.out.println(ollie); // println tự động gọi toString()
+
+        // 3. In ra số tín chỉ học trước khi sinh viên học
+        // Gọi phương thức credits() để lấy số tín chỉ hiện tại
+        System.out.println("Study credits " + ollie.credits());
+
+        // 4. Gọi phương thức study() để sinh viên học (tăng tín chỉ)
+        ollie.study();
+
+        // 5. In ra số tín chỉ học sau khi sinh viên học
+        // Gọi lại phương thức credits() để lấy số tín chỉ mới
+        System.out.println("Study credits " + ollie.credits());
+    }
+}
