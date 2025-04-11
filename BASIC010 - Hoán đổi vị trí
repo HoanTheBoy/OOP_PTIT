@@ -1,0 +1,62 @@
+import java.util.Scanner;
+import java.util.Arrays; // Thư viện này không thực sự cần thiết cho giải pháp này, nhưng có thể hữu ích cho các thao tác mảng khác.
+
+public class Main {
+
+    public static void main(String[] args) {
+        // Sử dụng Scanner để đọc dữ liệu đầu vào từ Bàn phím (System.in)
+        Scanner scanner = new Scanner(System.in);
+
+        // Đọc số lượng test cases (trường hợp kiểm thử)
+        int numberOfTestCases = scanner.nextInt();
+
+        // Lặp qua từng test case
+        while (numberOfTestCases > 0) {
+            // Đọc số nguyên n cho test case hiện tại
+            int n = scanner.nextInt();
+
+            // Chuyển số nguyên n thành chuỗi (String)
+            // Điều này giúp dễ dàng truy cập và hoán đổi các chữ số riêng lẻ
+            String s = Integer.toString(n);
+
+            // Chuyển chuỗi thành một mảng ký tự (char array)
+            // Lý do: Chuỗi trong Java là bất biến (immutable), nghĩa là không thể thay đổi trực tiếp.
+            // Mảng ký tự cho phép chúng ta thay đổi các phần tử (ký tự) tại chỗ.
+            char[] chars = s.toCharArray();
+
+            // Lấy độ dài của mảng ký tự (số chữ số của n)
+            int len = chars.length;
+
+            // Xác định chỉ số bắt đầu để hoán đổi
+            int startIndex = 0; // Mặc định bắt đầu từ chỉ số 0 (cho số có số chữ số chẵn)
+            if (len % 2 != 0) {
+                // Nếu độ dài là lẻ, chữ số đầu tiên (tại chỉ số 0) giữ nguyên
+                // Bắt đầu hoán đổi từ chỉ số 1 (chữ số thứ hai)
+                startIndex = 1;
+            }
+
+            // Duyệt qua mảng ký tự để hoán đổi các cặp liền kề
+            // Vòng lặp bắt đầu từ startIndex và tăng i lên 2 mỗi lần (nhảy qua từng cặp)
+            // Điều kiện i + 1 < len đảm bảo rằng chúng ta luôn có một cặp (chars[i] và chars[i+1]) để hoán đổi
+            // và không truy cập vượt quá giới hạn của mảng.
+            for (int i = startIndex; i + 1 < len; i += 2) {
+                // Hoán đổi ký tự tại vị trí i và i+1
+                char temp = chars[i];      // Lưu ký tự tại i vào biến tạm
+                chars[i] = chars[i + 1];  // Gán ký tự tại i+1 cho vị trí i
+                chars[i + 1] = temp;      // Gán ký tự trong biến tạm (ký tự gốc tại i) cho vị trí i+1
+            }
+
+            // Tạo một chuỗi mới từ mảng ký tự đã được sửa đổi
+            String result = new String(chars);
+
+            // In ra chuỗi kết quả, theo sau là một dòng mới
+            System.out.println(result);
+
+            // Giảm bộ đếm số test cases
+            numberOfTestCases--;
+        }
+
+        // Đóng Scanner sau khi đã sử dụng xong để giải phóng tài nguyên hệ thống
+        scanner.close();
+    }
+}
