@@ -1,0 +1,217 @@
+import java.util.Scanner;
+
+/**
+ * Lớp Author đại diện cho tác giả sách.
+ */
+class Author {
+    // Thuộc tính private để đảm bảo tính đóng gói
+    private String name;
+    private String email;
+    private char gender; // Chỉ chấp nhận 'f' hoặc 'm'
+
+    /**
+     * Hàm khởi tạo (constructor) cho lớp Author.
+     * @param name Tên tác giả.
+     * @param email Email tác giả.
+     * @param gender Giới tính tác giả ('f' hoặc 'm').
+     */
+    public Author(String name, String email, char gender) {
+        this.name = name;
+        this.email = email;
+        // Gọi setter để đảm bảo validation giới tính ngay khi khởi tạo
+        this.setGender(gender);
+    }
+
+    // --- Accessors (Getters) ---
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public char getGender() {
+        return gender;
+    }
+
+    // --- Mutators (Setters) ---
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    /**
+     * Thiết lập giới tính, chỉ chấp nhận 'f' hoặc 'm'.
+     * Nếu giá trị không hợp lệ, giới tính sẽ không được thay đổi (hoặc có thể xử lý lỗi khác).
+     * @param gender Giới tính mới ('f' hoặc 'm').
+     */
+    public void setGender(char gender) {
+        // Có thể chuẩn hóa về chữ thường nếu muốn chấp nhận cả 'F', 'M'
+        // char lowerGender = Character.toLowerCase(gender);
+        if (gender == 'f' || gender == 'm') {
+            this.gender = gender;
+        }
+        // Optional: Xử lý trường hợp gender không hợp lệ (ví dụ: in thông báo lỗi, ném exception,
+        // hoặc không làm gì cả như hiện tại để giữ giá trị cũ nếu có)
+        // System.err.println("Invalid gender: " + gender + ". Must be 'f' or 'm'.");
+    }
+
+    /**
+     * Trả về biểu diễn chuỗi của đối tượng Author.
+     * Định dạng: Author[name=?, email=?, gender=?]
+     * @return Chuỗi thông tin tác giả.
+     */
+    @Override
+    public String toString() {
+        return "Author[name=" + name + ", email=" + email + ", gender=" + gender + "]";
+    }
+}
+
+/**
+ * Lớp Book đại diện cho một cuốn sách.
+ */
+class Book {
+    // Thuộc tính private
+    private String name;
+    private Author author; // Tham chiếu đến đối tượng Author
+    private double price;
+    private int qty; // Mặc định là 0 nếu không được cung cấp
+
+    /**
+     * Hàm khởi tạo đầy đủ cho Book.
+     * @param name Tên sách.
+     * @param author Đối tượng Author của sách.
+     * @param price Giá sách.
+     * @param qty Số lượng sách.
+     */
+    public Book(String name, Author author, double price, int qty) {
+        this.name = name;
+        this.author = author;
+        this.price = price;
+        this.qty = qty;
+    }
+
+    /**
+     * Hàm khởi tạo cho Book với số lượng mặc định là 0.
+     * @param name Tên sách.
+     * @param author Đối tượng Author của sách.
+     * @param price Giá sách.
+     */
+    public Book(String name, Author author, double price) {
+        this.name = name;
+        this.author = author;
+        this.price = price;
+        this.qty = 0; // Số lượng mặc định
+    }
+
+    // --- Accessors (Getters) ---
+
+    public String getName() {
+        return name;
+    }
+
+    public Author getAuthor() {
+        return author;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public int getQty() {
+        return qty;
+    }
+
+    // --- Mutators (Setters) ---
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAuthor(Author author) {
+        this.author = author;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setQty(int qty) {
+        this.qty = qty;
+    }
+
+    /**
+     * Trả về biểu diễn chuỗi của đối tượng Book.
+     * Định dạng: Book[name=?, Author[name=?, email=?, gender=?], price=?, qty=?]
+     * Tái sử dụng phương thức toString() của lớp Author.
+     * @return Chuỗi thông tin sách.
+     */
+    @Override
+    public String toString() {
+        // Kiểm tra author có null không để tránh NullPointerException (mặc dù constructor yêu cầu)
+        String authorStr = (author != null) ? author.toString() : "Author[null]";
+        return "Book[name=" + name + ", " + authorStr + ", price=" + price + ", qty=" + qty + "]";
+    }
+}
+
+/**
+ * Lớp Main để xử lý nhập liệu và in kết quả.
+ */
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Đọc số lượng test case (mặc dù ví dụ chỉ dùng 1 block kết thúc bằng "End")
+        int numberOfTestCases = Integer.parseInt(scanner.nextLine());
+
+        for (int i = 0; i < numberOfTestCases; i++) {
+            // Biến tạm để lưu thông tin đọc được cho mỗi test case
+            String bookName = null;
+            double bookPrice = 0.0;
+            int bookQty = 0;
+            Author currentAuthor = null;
+            Book currentBook = null;
+
+            // Vòng lặp đọc cho đến khi gặp "End" cho test case hiện tại
+            while (scanner.hasNextLine()) {
+                String type = scanner.nextLine();
+
+                if (type.equals("Book")) {
+                    // Đọc thông tin sách và lưu tạm
+                    bookName = scanner.nextLine();
+                    bookPrice = Double.parseDouble(scanner.nextLine());
+                    bookQty = Integer.parseInt(scanner.nextLine());
+                } else if (type.equals("Author")) {
+                    // Đọc thông tin tác giả và tạo đối tượng Author
+                    String authorName = scanner.nextLine();
+                    String authorEmail = scanner.nextLine();
+                    // Đọc giới tính (chỉ lấy ký tự đầu tiên của dòng)
+                    char authorGender = scanner.nextLine().charAt(0);
+                    currentAuthor = new Author(authorName, authorEmail, authorGender);
+                } else if (type.equals("End")) {
+                    // Khi gặp "End", tạo đối tượng Book nếu có đủ thông tin
+                    if (bookName != null && currentAuthor != null) {
+                        currentBook = new Book(bookName, currentAuthor, bookPrice, bookQty);
+                    } else {
+                        System.err.println("Lỗi: Thiếu thông tin sách hoặc tác giả trước 'End'.");
+                    }
+                    break; // Kết thúc vòng lặp đọc cho test case này
+                }
+                // Có thể thêm else để xử lý dòng không mong muốn nếu cần
+            }
+
+            // In kết quả của test case nếu tạo được sách
+            if (currentBook != null) {
+                System.out.println(currentBook); // Tự động gọi toString()
+            }
+        }
+
+        scanner.close(); // Đóng scanner sau khi hoàn tất
+    }
+}
