@@ -1,0 +1,67 @@
+import java.util.Scanner;
+
+/**
+ * Custom exception class thrown when a string does not contain any vowels.
+ */
+class NotContainVowelException extends Exception {
+    /**
+     * Constructs a new NotContainVowelException with the specified detail message.
+     * @param message the detail message.
+     */
+    public NotContainVowelException(String message) {
+        super(message); // Pass the message to the parent Exception class
+    }
+}
+
+public class Main {
+
+    /**
+     * Checks if a given string contains any vowels (a, e, i, o, u), case-insensitive.
+     *
+     * @param str The string to check.
+     * @throws NotContainVowelException If the string does not contain any vowels.
+     */
+    public static void checkForVowels(String str) throws NotContainVowelException {
+        boolean foundVowel = false;
+        // Convert the string to lowercase for case-insensitive comparison
+        String lowerCaseStr = str.toLowerCase();
+
+        for (int i = 0; i < lowerCaseStr.length(); i++) {
+            char c = lowerCaseStr.charAt(i);
+            // Check if the character is one of the specified vowels
+            if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
+                foundVowel = true;
+                break; // Exit the loop early as soon as a vowel is found
+            }
+        }
+
+        // If the loop finished and no vowel was found, throw the exception
+        if (!foundVowel) {
+            throw new NotContainVowelException("String not contain vowels");
+        }
+        // If we reach here, it means at least one vowel was found
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases
+        int n = Integer.parseInt(scanner.nextLine());
+
+        // Process each test case
+        for (int i = 0; i < n; i++) {
+            String inputString = scanner.nextLine();
+            try {
+                // Attempt to check the string for vowels
+                checkForVowels(inputString);
+                // If checkForVowels completes without throwing an exception, it means vowels exist
+                System.out.println("String has vowels");
+            } catch (NotContainVowelException e) {
+                // If the exception is caught, print its message
+                System.out.println(e.getMessage());
+            }
+        }
+
+        scanner.close(); // Close the scanner
+    }
+}
