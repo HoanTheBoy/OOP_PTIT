@@ -1,0 +1,132 @@
+import java.util.Scanner; // Mặc dù không dùng Scanner trong bài này, nhưng để đó cũng không sao
+
+/**
+ * Interface TacoBox định nghĩa các hành vi cơ bản cho một hộp Taco.
+ * Bất kỳ lớp nào muốn hoạt động như một hộp Taco đều phải cung cấp
+ * các phương thức được định nghĩa trong interface này.
+ */
+interface TacoBox {
+    /**
+     * Trả về số lượng taco hiện còn lại trong hộp.
+     * @return Số lượng taco còn lại (số nguyên).
+     */
+    int tacosRemaining();
+
+    /**
+     * Mô phỏng hành động ăn một chiếc taco.
+     * Giảm số lượng taco trong hộp đi 1, nhưng không xuống dưới 0.
+     */
+    void eat();
+}
+
+/**
+ * Lớp TripleTacoBox đại diện cho một hộp Taco luôn bắt đầu với 3 chiếc.
+ * Lớp này thực hiện (implements) interface TacoBox.
+ */
+class TripleTacoBox implements TacoBox {
+    // Thuộc tính lưu số lượng taco hiện có, khởi tạo là 3
+    private int tacos = 3;
+
+    /**
+     * Hàm khởi tạo (constructor) mặc định cho TripleTacoBox.
+     * Không cần làm gì thêm vì số taco đã được khởi tạo là 3.
+     */
+    public TripleTacoBox() {
+        // Mặc định số taco là 3 khi tạo đối tượng
+    }
+
+    /**
+     * Trả về số lượng taco còn lại trong hộp.
+     * Thực hiện phương thức từ interface TacoBox.
+     * @return Số lượng taco còn lại.
+     */
+    @Override // Đánh dấu rằng phương thức này đang ghi đè một phương thức từ interface
+    public int tacosRemaining() {
+        return this.tacos;
+    }
+
+    /**
+     * Giảm số lượng taco đi 1 nếu vẫn còn taco trong hộp.
+     * Thực hiện phương thức từ interface TacoBox.
+     */
+    @Override
+    public void eat() {
+        // Chỉ giảm nếu số taco lớn hơn 0
+        if (this.tacos > 0) {
+            this.tacos--; // Giảm số taco đi 1
+        }
+        // Nếu this.tacos là 0 thì không làm gì cả
+    }
+}
+
+/**
+ * Lớp CustomTacoBox đại diện cho một hộp Taco với số lượng ban đầu tùy chỉnh.
+ * Lớp này cũng thực hiện (implements) interface TacoBox.
+ */
+class CustomTacoBox implements TacoBox {
+    // Thuộc tính lưu số lượng taco hiện có
+    private int tacos;
+
+    /**
+     * Hàm khởi tạo (constructor) cho CustomTacoBox.
+     * @param initialTacos Số lượng taco ban đầu muốn đặt cho hộp.
+     */
+    public CustomTacoBox(int initialTacos) {
+        // Đảm bảo số taco ban đầu không âm (mặc dù đề bài không yêu cầu)
+        this.tacos = Math.max(0, initialTacos);
+    }
+
+    /**
+     * Trả về số lượng taco còn lại trong hộp.
+     * Thực hiện phương thức từ interface TacoBox.
+     * @return Số lượng taco còn lại.
+     */
+    @Override
+    public int tacosRemaining() {
+        return this.tacos;
+    }
+
+    /**
+     * Giảm số lượng taco đi 1 nếu vẫn còn taco trong hộp.
+     * Thực hiện phương thức từ interface TacoBox.
+     */
+    @Override
+    public void eat() {
+        // Chỉ giảm nếu số taco lớn hơn 0
+        if (this.tacos > 0) {
+            this.tacos--; // Giảm số taco đi 1
+        }
+    }
+}
+
+/**
+ * Lớp Main chứa phương thức main để chạy chương trình demo.
+ */
+public class Main {
+
+    /**
+     * Phương thức main thực hiện các yêu cầu của đề bài.
+     * @param args Tham số dòng lệnh (không sử dụng).
+     */
+    public static void main(String[] args) {
+        // 1. Tạo một đối tượng TripleTacoBox
+        // Có thể khai báo kiểu là TacoBox để thể hiện tính đa hình
+        TacoBox tripleBox = new TripleTacoBox();
+
+        // 2. Gọi phương thức eat() hai lần trên tripleBox
+        tripleBox.eat();
+        tripleBox.eat();
+
+        // 3. In số lượng taco còn lại của tripleBox
+        System.out.println("Triple taco boxes left: " + tripleBox.tacosRemaining());
+
+        // 4. Tạo một đối tượng CustomTacoBox với 8 taco
+        TacoBox customBox = new CustomTacoBox(8);
+
+        // 5. Gọi phương thức eat() một lần trên customBox
+        customBox.eat();
+
+        // 6. In số lượng taco còn lại của customBox
+        System.out.println("Custom taco boxes left: " + customBox.tacosRemaining());
+    }
+}
