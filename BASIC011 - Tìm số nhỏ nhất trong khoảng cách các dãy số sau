@@ -1,0 +1,93 @@
+import java.util.Scanner;
+import java.util.ArrayList; // Có thể dùng ArrayList nếu không biết trước số lượng phần tử
+import java.util.List;      // Hoặc dùng List interface
+
+public class Main {
+
+    /**
+     * Hàm tính khoảng cách nhỏ nhất giữa hai phần tử liền kề trong dãy số.
+     * Khoảng cách được tính bằng hiệu của phần tử sau trừ đi phần tử trước (a[i+1] - a[i]).
+     *
+     * @param nums Mảng các số nguyên.
+     * @return Khoảng cách nhỏ nhất. Trả về 0 nếu mảng có ít hơn 2 phần tử.
+     */
+    public static int minGap(int[] nums) {
+        // Kiểm tra trường hợp cơ bản: Nếu mảng có ít hơn 2 phần tử, không có cặp liền kề nào.
+        if (nums == null || nums.length < 2) {
+            return 0; // Trả về 0 theo yêu cầu đề bài.
+        }
+
+        // Khởi tạo khoảng cách nhỏ nhất (minGap) bằng khoảng cách của cặp đầu tiên.
+        // Điều này tránh việc phải khởi tạo bằng một giá trị rất lớn (Integer.MAX_VALUE).
+        int minGapResult = nums[1] - nums[0];
+
+        // Duyệt qua mảng từ phần tử thứ hai (chỉ số 1) đến gần cuối (chỉ số length - 2).
+        // Vì ta cần truy cập nums[i+1], vòng lặp phải dừng khi i = nums.length - 2.
+        for (int i = 1; i < nums.length - 1; i++) {
+            // Tính khoảng cách của cặp hiện tại (nums[i+1] - nums[i])
+            int currentGap = nums[i + 1] - nums[i];
+
+            // So sánh khoảng cách hiện tại với khoảng cách nhỏ nhất đã tìm thấy.
+            // Nếu khoảng cách hiện tại nhỏ hơn, cập nhật minGapResult.
+            if (currentGap < minGapResult) {
+                minGapResult = currentGap;
+            }
+
+            // Cách viết ngắn gọn hơn dùng Math.min:
+            // minGapResult = Math.min(minGapResult, currentGap);
+        }
+
+        // Trả về khoảng cách nhỏ nhất tìm được.
+        return minGapResult;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Đọc số lượng test cases
+        int numberOfTestCases = scanner.nextInt();
+        scanner.nextLine(); // Đọc bỏ dòng thừa còn lại sau khi đọc số nguyên
+
+        // Lặp qua từng test case
+        for (int t = 0; t < numberOfTestCases; t++) {
+            // Đọc cả dòng chứa dãy số
+            String line = scanner.nextLine();
+
+            // Tách các số trong dòng dựa trên dấu cách
+            String[] numberStrings = line.trim().split("\\s+"); // trim() loại bỏ khoảng trắng thừa đầu/cuối
+                                                              // \\s+ khớp với một hoặc nhiều khoảng trắng
+
+            // Tạo mảng số nguyên để lưu trữ các số đã chuyển đổi
+            // Kiểm tra xem numberStrings có rỗng không (trường hợp dòng trống hoặc chỉ có khoảng trắng)
+            if (numberStrings.length == 0 || (numberStrings.length == 1 && numberStrings[0].isEmpty())) {
+                 System.out.println(0); // Nếu dòng trống hoặc không có số, coi như dãy < 2 phần tử
+                 continue; // Chuyển sang test case tiếp theo
+            }
+
+            int[] numbers = new int[numberStrings.length];
+
+            // Chuyển đổi từng chuỗi số thành số nguyên và lưu vào mảng
+            try {
+                 for (int i = 0; i < numberStrings.length; i++) {
+                    numbers[i] = Integer.parseInt(numberStrings[i]);
+                 }
+            } catch (NumberFormatException e) {
+                // Xử lý trường hợp input không phải là số (nếu cần, đề bài thường đảm bảo input hợp lệ)
+                System.err.println("Lỗi định dạng số trong test case: " + line);
+                // Có thể in 0 hoặc bỏ qua test case này tùy yêu cầu
+                System.out.println(0);
+                continue;
+            }
+
+
+            // Gọi hàm minGap để tính kết quả
+            int result = minGap(numbers);
+
+            // In kết quả cho test case hiện tại
+            System.out.println(result);
+        }
+
+        // Đóng Scanner sau khi hoàn thành
+        scanner.close();
+    }
+}
