@@ -1,0 +1,48 @@
+import java.util.Scanner;
+
+public class Main {
+
+    /**
+     * Creates a "string splosion" by concatenating prefixes of the input string.
+     * For example, stringSplosion("Code") returns "CCoCodCode".
+     *
+     * @param str The non-empty input string.
+     * @return The string splosion result.
+     */
+    public static String stringSplosion(String str) {
+        // Use StringBuilder for efficient string concatenation in a loop
+        StringBuilder resultBuilder = new StringBuilder();
+
+        // Loop from prefix length 1 up to the full length of the string
+        for (int i = 1; i <= str.length(); i++) {
+            // Extract the prefix of length 'i' (substring from index 0 up to, but not including, i)
+            String prefix = str.substring(0, i);
+            // Append the current prefix to the result
+            resultBuilder.append(prefix);
+        }
+
+        // Convert the StringBuilder back to a String and return it
+        return resultBuilder.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases
+        int n = Integer.parseInt(scanner.nextLine());
+
+        // Process each test case
+        for (int i = 0; i < n; i++) {
+            // Read the input string for the current test case
+            String inputStr = scanner.nextLine();
+
+            // Call the stringSplosion function to get the result
+            String result = stringSplosion(inputStr);
+
+            // Print the result for the current test case
+            System.out.println(result);
+        }
+
+        scanner.close(); // Close the scanner
+    }
+}
