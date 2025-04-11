@@ -1,0 +1,280 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects; // Used for equals/hashCode, though not strictly needed for the problem's comparison logic
+
+/**
+ * Represents a single product item with its quantity and unit price.
+ */
+class Item {
+    private String product;
+    private int quantity;
+    private int unitPrice;
+
+    /**
+     * Constructs a new Item.
+     * @param product The name of the product.
+     * @param quantity The initial quantity.
+     * @param unitPrice The price per unit.
+     */
+    public Item(String product, int quantity, int unitPrice) {
+        this.product = product;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+    }
+
+    // --- Getters ---
+
+    public String getProduct() {
+        return product;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public int getUnitPrice() {
+        return unitPrice;
+    }
+
+    // --- Setter ---
+
+    /**
+     * Sets the quantity of the item. Ensures quantity doesn't go below zero.
+     * @param quantity The new quantity.
+     */
+    public void setQuantity(int quantity) {
+        this.quantity = Math.max(0, quantity); // Prevent negative quantity
+    }
+
+    // --- Calculated Property ---
+
+    /**
+     * Calculates the total price for this item (quantity * unitPrice).
+     * @return The total price.
+     */
+    public int getPrice() {
+        return this.quantity * this.unitPrice;
+    }
+
+    // --- Overridden Methods ---
+
+    /**
+     * Returns a string representation of the item in the required format:
+     * "Product: [product] has quantity [quantity] with price: [price]"
+     * @return Formatted string representation.
+     */
+    @Override
+    public String toString() {
+        return "Product: " + this.product + " has quantity " + this.quantity + " with price: " + getPrice();
+    }
+
+    /**
+     * Checks if two Item objects represent the same product (based on product name).
+     * @param o The object to compare with.
+     * @return true if the product names are the same, false otherwise.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return Objects.equals(product, item.product); // Compare based on product name
+    }
+
+    /**
+     * Generates a hash code based on the product name.
+     * @return The hash code.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(product); // Hash based on product name
+    }
+}
+
+/**
+ * Represents a warehouse that stores and manages Item objects.
+ */
+class Warehouse {
+    private List<Item> items; // List to hold the items in the warehouse
+
+    /**
+     * Constructs an empty Warehouse.
+     */
+    public Warehouse() {
+        this.items = new ArrayList<>();
+    }
+
+    /**
+     * Adds an Item object to the warehouse.
+     * If an item with the same product name already exists, this implementation
+     * simply adds the new reference (as implied by the problem's structure
+     * where original item objects are modified).
+     *
+     * @param item The Item object to add.
+     */
+    public void importProduct(Item item) {
+        // The problem structure relies on modifying the original Item objects passed in,
+        // so we add the reference directly.
+        this.items.add(item);
+    }
+
+    /**
+     * Reduces the quantity of a specific product in the warehouse.
+     * Finds the item by product name and decreases its quantity.
+     *
+     * @param itemToRemove An Item object containing the product name and quantity to remove.
+     *                     The unitPrice of this object is ignored.
+     */
+    public void removeProduct(Item itemToRemove) {
+        Item itemInWarehouse = findItem(itemToRemove.getProduct());
+        if (itemInWarehouse != null) {
+            int currentQuantity = itemInWarehouse.getQuantity();
+            int quantityToRemove = itemToRemove.getQuantity();
+            itemInWarehouse.setQuantity(currentQuantity - quantityToRemove);
+        }
+        // Optional: Add error handling if item not found
+        // else { System.out.println("Warning: Item '" + itemToRemove.getProduct() + "' not found for removal."); }
+    }
+
+    /**
+     * Decreases the quantity of every item currently in the warehouse by one.
+     */
+    public void decreaseQuantityInWarehouseByOne() {
+        for (Item item : this.items) {
+            item.setQuantity(item.getQuantity() - 1);
+        }
+    }
+
+    /**
+     * Increases the quantity of a product in the warehouse by taking it from a
+     * provided checklist of items. The amount added is limited by the quantity
+     * available in the checklist for that specific product.
+     *
+     * @param itemsToCheck A List of Item objects representing available stock to check against.
+     * @param product      The name of the product to increase in the warehouse.
+     * @param quantity     The desired quantity to add to the warehouse.
+     */
+     public void takeFromItemToWarehouse(List<Item> itemsToCheck, String product, int quantity) {
+        Item itemFromCheckList = null;
+        // 1. Find the item in the check list
+        for (Item checkItem : itemsToCheck) {
+            if (checkItem.getProduct().equals(product)) {
+                itemFromCheckList = checkItem;
+                break;
+            }
+        }
+
+        // 2. If item not found in checklist, do nothing
+        if (itemFromCheckList == null) {
+             // System.out.println("Info: Product '" + product + "' not found in itemsToCheck.");
+            return;
+        }
+
+        // 3. Find the corresponding item in the warehouse inventory
+        Item itemInWarehouse = findItem(product);
+        if (itemInWarehouse == null) {
+             // System.out.println("Info: Product '" + product + "' not found in warehouse to add quantity.");
+             return; // Cannot add quantity if the base item isn't already in the warehouse
+        }
+
+        // 4. Determine the actual quantity to add
+        // It's the minimum of the requested quantity and the quantity available in the checklist
+        int availableQuantityInCheckList = itemFromCheckList.getQuantity();
+        int actualQuantityToAdd = Math.min(quantity, availableQuantityInCheckList);
+
+        // 5. Increase quantity in the warehouse item
+        itemInWarehouse.setQuantity(itemInWarehouse.getQuantity() + actualQuantityToAdd);
+
+        // Optional: Decrease the quantity in the checklist item (not required by the problem output)
+        // itemFromCheckList.setQuantity(availableQuantityInCheckList - actualQuantityToAdd);
+    }
+
+
+    /**
+     * Helper method to find an item within the warehouse's list by its product name.
+     *
+     * @param productName The name of the product to find.
+     * @return The Item object if found, otherwise null.
+     */
+    private Item findItem(String productName) {
+        for (Item item : this.items) {
+            if (item.getProduct().equals(productName)) {
+                return item;
+            }
+        }
+        return null; // Not found
+    }
+
+    // --- Optional Utility Method ---
+    /**
+     * Prints the current state of all items in the warehouse. Useful for debugging.
+     */
+    public void printWarehouseState() {
+        System.out.println("--- Warehouse State ---");
+        if (items.isEmpty()) {
+            System.out.println("Warehouse is empty.");
+        } else {
+            for (Item item : items) {
+                System.out.println(item); // Uses Item's toString()
+            }
+        }
+        System.out.println("-----------------------");
+    }
+}
+
+/**
+ * Main class to demonstrate the Warehouse management system.
+ * Follows the steps outlined in the problem description.
+ */
+public class Main {
+    public static void main(String[] args) {
+
+        // (1): Create 2 Items and print their initial state
+        // System.out.println("(1) Initial Item Creation:"); // Label not required in final output
+        Item milk = new Item("milk", 4, 2);
+        Item buttermilk = new Item("buttermilk", 10, 2);
+        System.out.println(milk);
+        System.out.println(buttermilk);
+        // System.out.println(); // Separator not required in final output
+
+        // (2): Add the 2 created products to the warehouse
+        Warehouse warehouse = new Warehouse();
+        warehouse.importProduct(milk);       // Pass the reference to the milk object
+        warehouse.importProduct(buttermilk); // Pass the reference to the buttermilk object
+        // No printing required for step (2)
+
+        // (3): Remove specified quantities of products and print the state
+        // System.out.println("(3) After Removal:"); // Label not required
+        // Create temporary Item objects just to specify what to remove
+        warehouse.removeProduct(new Item("milk", 1, 0)); // unitPrice is irrelevant here
+        warehouse.removeProduct(new Item("buttermilk", 3, 0));
+        // Print the state of the *original* milk and buttermilk objects,
+        // which have been modified via the warehouse operations.
+        System.out.println(milk);
+        System.out.println(buttermilk);
+        // System.out.println(); // Separator not required
+
+        // (4): Decrease quantity of all items in the warehouse by one and print state
+        // System.out.println("(4) After Decreasing All by One:"); // Label not required
+        warehouse.decreaseQuantityInWarehouseByOne();
+        System.out.println(milk);
+        System.out.println(buttermilk);
+        // System.out.println(); // Separator not required
+
+        // (5): Use takeFromItemToWarehouse logic and print the final state
+        // System.out.println("(5) After Taking from Checklist:"); // Label not required
+        // a) Define the checklist items
+        List<Item> itemsToCheck = new ArrayList<>();
+        // Unit price doesn't matter for the checklist's role in this step
+        itemsToCheck.add(new Item("milk", 2, 0));
+        itemsToCheck.add(new Item("buttermilk", 6, 0));
+
+        // b) Perform the 'take' operations, attempting to add quantities to the warehouse
+        warehouse.takeFromItemToWarehouse(itemsToCheck, "milk", 5);       // Request 5 milk, only 2 available in check list
+        warehouse.takeFromItemToWarehouse(itemsToCheck, "buttermilk", 1); // Request 1 buttermilk, 6 available in check list
+
+        // c) Print the final state of the items in the warehouse
+        System.out.println(milk);
+        System.out.println(buttermilk);
+    }
+}
