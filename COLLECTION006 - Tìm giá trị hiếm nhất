@@ -1,0 +1,78 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases
+        int t = Integer.parseInt(scanner.nextLine());
+
+        // Process each test case
+        while (t-- > 0) {
+            // Read the line containing key-value pairs for the current test case
+            String line = scanner.nextLine();
+            String[] parts = line.split(" "); // Split the line by spaces
+
+            // Use a Map to store the frequency of each integer value
+            Map<Integer, Integer> valueFrequencies = new HashMap<>();
+
+            // Iterate through the parts array, extracting only the values (at odd indices)
+            for (int i = 1; i < parts.length; i += 2) {
+                try {
+                    int value = Integer.parseInt(parts[i]);
+                    // Increment the count for this value in the map
+                    // getOrDefault gets the current count or 0 if the value is not yet in the map
+                    valueFrequencies.put(value, valueFrequencies.getOrDefault(value, 0) + 1);
+                } catch (NumberFormatException e) {
+                    // Handle cases where a value might not be a valid integer, though
+                    // the problem description implies valid input.
+                    System.err.println("Warning: Invalid number format encountered: " + parts[i]);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                     // Handle cases with an odd number of parts (missing last value)
+                     System.err.println("Warning: Input line has an unexpected format near the end.");
+                     break; // Stop processing this line if format is wrong
+                }
+            }
+
+            // Now find the value with the minimum frequency
+            // Initialize with values that will be easily overridden
+            int minFrequency = Integer.MAX_VALUE;
+            int rarestValue = Integer.MAX_VALUE; // Initialize high to find the minimum value in case of ties
+
+            // Iterate through the entries (value-frequency pairs) in the map
+            for (Map.Entry<Integer, Integer> entry : valueFrequencies.entrySet()) {
+                int currentValue = entry.getKey();
+                int currentFrequency = entry.getValue();
+
+                // Check if this frequency is lower than the current minimum
+                if (currentFrequency < minFrequency) {
+                    minFrequency = currentFrequency;
+                    rarestValue = currentValue;
+                }
+                // If frequencies are equal, check if the current value is smaller (tie-breaker)
+                else if (currentFrequency == minFrequency) {
+                    if (currentValue < rarestValue) {
+                        rarestValue = currentValue;
+                    }
+                    // Alternative using Math.min for conciseness:
+                    // rarestValue = Math.min(rarestValue, currentValue);
+                }
+            }
+
+            // Print the result for the current test case
+            // Check if any values were actually processed
+            if (minFrequency != Integer.MAX_VALUE) {
+                 System.out.println(rarestValue);
+            } else {
+                // Handle the edge case where the input line was empty or had no valid values
+                // The problem constraints likely prevent this, but it's good practice.
+                // System.out.println("No values found in test case."); // Or print 0, or as required
+            }
+        }
+
+        scanner.close(); // Close the scanner
+    }
+}
