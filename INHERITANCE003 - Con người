@@ -1,0 +1,118 @@
+/**
+ * Lớp Person đại diện cho một người với tên và địa chỉ.
+ */
+class Person {
+    // Thuộc tính: tên và địa chỉ, để private để đảm bảo tính đóng gói
+    private String name;
+    private String address;
+
+    /**
+     * Constructor để khởi tạo đối tượng Person.
+     * @param name Tên của người.
+     * @param address Địa chỉ của người.
+     */
+    public Person(String name, String address) {
+        this.name = name;
+        this.address = address;
+    }
+
+    /**
+     * Phương thức trả về tên của người.
+     * @return Tên người.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Phương thức trả về địa chỉ của người.
+     * @return Địa chỉ người.
+     */
+    public String getAddress() {
+        return address;
+    }
+
+    /**
+     * Phương thức trả về chuỗi biểu diễn của đối tượng Person.
+     * @return Chuỗi có định dạng "{name} - {address}".
+     */
+    @Override // Đánh dấu rằng phương thức này ghi đè phương thức của lớp cha (Object)
+    public String toString() {
+        return this.name + " - " + this.address;
+        // Hoặc dùng String.format cho rõ ràng hơn:
+        // return String.format("%s - %s", this.name, this.address);
+    }
+}
+
+/**
+ * Lớp Student kế thừa từ lớp Person, đại diện cho một sinh viên.
+ * Bổ sung thêm thông tin về mã số sinh viên và số tín chỉ.
+ */
+class Student extends Person {
+    // Thuộc tính riêng của Student
+    private int credits;      // Số tín chỉ, khởi tạo mặc định là 0
+    private String studentID; // Mã số sinh viên
+
+    /**
+     * Constructor để khởi tạo đối tượng Student.
+     * Gọi constructor của lớp cha (Person) để khởi tạo tên và địa chỉ.
+     * @param name Tên của sinh viên.
+     * @param address Địa chỉ của sinh viên.
+     * @param studentID Mã số sinh viên.
+     */
+    public Student(String name, String address, String studentID) {
+        // Phải gọi constructor của lớp cha (Person) đầu tiên
+        super(name, address);
+        this.studentID = studentID;
+        this.credits = 0; // Khởi tạo số tín chỉ là 0 khi tạo sinh viên mới
+    }
+
+    /**
+     * Phương thức mô phỏng việc học, tăng số tín chỉ lên 1.
+     */
+    public void study() {
+        this.credits++;
+    }
+
+    /**
+     * Phương thức trả về số tín chỉ hiện tại của sinh viên.
+     * @return Số tín chỉ.
+     */
+    public int getCredits() { // Tên phương thức getCredits() rõ ràng hơn là credits()
+        return this.credits;
+    }
+
+    // Không cần định nghĩa lại phương thức toString() ở đây
+    // vì yêu cầu chỉ cần in thông tin dạng Person (tên - địa chỉ).
+    // Nếu muốn in thêm studentID, ta mới cần override toString() ở đây.
+    // Ví dụ override (không cần thiết cho bài này):
+    // @Override
+    // public String toString() {
+    //     return super.toString() + " - ID: " + this.studentID + " - Credits: " + this.credits;
+    // }
+}
+
+/**
+ * Lớp Main chứa phương thức main để chạy chương trình.
+ */
+public class Main { // Đặt tên class là Main
+    public static void main(String[] args) {
+        // 1. Tạo đối tượng Student với thông tin cụ thể
+        //    Mã số sinh viên "90028" chỉ là một ví dụ, có thể dùng mã khác.
+        Student student = new Student("Ollie", "6381 Hollywood Blvd. Los Angeles 90028", "LA90028");
+
+        // 2. In thông tin của đối tượng Student.
+        //    Java sẽ tự động gọi phương thức toString() của đối tượng.
+        //    Vì Student kế thừa Person và không override toString(), nó sẽ gọi toString() của Person.
+        System.out.println(student); // Hoặc System.out.println(student.toString());
+
+        // 3. In số lượng tín chỉ trước khi gọi hàm study()
+        System.out.println("Study credits " + student.getCredits());
+
+        // 4. Gọi phương thức study()
+        student.study();
+
+        // 5. In số tín chỉ sau khi gọi study()
+        System.out.println("Study credits " + student.getCredits());
+    }
+}
