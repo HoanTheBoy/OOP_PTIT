@@ -1,0 +1,217 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Locale; // Để đảm bảo định dạng dấu thập phân là '.'
+
+// --- (1) Lớp trừu tượng Product ---
+abstract class Product {
+    protected String name;
+    protected double price;
+    protected int quantity;
+
+    public Product(String name, double price, int quantity) {
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+    }
+
+    // Phương thức trừu tượng, phải được implement bởi lớp con
+    public abstract double calculateCost(int quantity);
+
+    // Phương thức hiển thị chi tiết chung
+    public void displayDetails() {
+        // Sử dụng Locale.US để đảm bảo dấu thập phân là '.'
+        System.out.printf(Locale.US,"Name: %s\n", this.name);
+        System.out.printf(Locale.US,"Price: $%.1f\n", this.price);
+        System.out.printf(Locale.US,"Available Quantity: %d\n", this.quantity);
+    }
+
+    // Getters cần thiết
+    public String getName() {
+        return name;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    // Phương thức để giảm số lượng sau khi mua
+    public void decreaseQuantity(int amount) {
+        if (amount <= this.quantity) {
+            this.quantity -= amount;
+        }
+    }
+}
+
+// --- (2) Lớp Book kế thừa Product ---
+class Book extends Product {
+    private String author;
+
+    public Book(String name, double price, int quantity, String author) {
+        super(name, price, quantity); // Gọi constructor của lớp cha
+        this.author = author;
+    }
+
+    @Override
+    public double calculateCost(int quantity) {
+        // Công thức: price * quantity
+        return this.price * quantity;
+    }
+
+    @Override
+    public void displayDetails() {
+        super.displayDetails(); // Gọi displayDetails của lớp cha trước
+        System.out.printf(Locale.US,"Author: %s\n", this.author);
+    }
+}
+
+// --- (3) Lớp Electronics kế thừa Product ---
+class Electronics extends Product {
+    private String brand;
+
+    public Electronics(String name, double price, int quantity, String brand) {
+        super(name, price, quantity); // Gọi constructor của lớp cha
+        this.brand = brand;
+    }
+
+    @Override
+    public double calculateCost(int quantity) {
+        // Công thức: price * quantity * 1.1
+        return this.price * quantity * 1.1;
+    }
+
+    @Override
+    public void displayDetails() {
+        super.displayDetails(); // Gọi displayDetails của lớp cha trước
+        System.out.printf(Locale.US,"Brand: %s\n", this.brand);
+    }
+}
+
+// --- (4) Lớp User ---
+class User {
+    private String username;
+    private double totalSpent;
+
+    public User(String username) {
+        this.username = username;
+        this.totalSpent = 0.0;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public double getTotalSpent() {
+        return totalSpent;
+    }
+
+    /**
+     * Thực hiện hành động mua sản phẩm.
+     * @param product Sản phẩm cần mua (có thể là Book hoặc Electronics).
+     * @param quantityToBuy Số lượng muốn mua.
+     */
+    public void buyProduct(Product product, int quantityToBuy) {
+        if (quantityToBuy <= 0) {
+            System.out.println("Quantity must be positive."); // Kiểm tra bổ sung
+            return;
+        }
+
+        if (quantityToBuy <= product.getQuantity()) {
+            // Đủ hàng
+            double cost = product.calculateCost(quantityToBuy); // Tính giá (dùng đa hình)
+            System.out.printf(Locale.US, "User: %s bought %d %s for $%.1f\n",
+                              this.username, quantityToBuy, product.getName(), cost);
+
+            // Cập nhật số lượng sản phẩm và tổng chi tiêu của người dùng
+            product.decreaseQuantity(quantityToBuy);
+            this.totalSpent += cost;
+        } else {
+            // Không đủ hàng
+            System.out.printf(Locale.US, "Insufficient quantity of %s available.\n", product.getName());
+        }
+    }
+}
+
+// --- (5) Lớp Main để thực thi các nhiệm vụ ---
+public class Main { // Đổi tên lớp thành Main
+
+    // Hàm sắp xếp thủ công (Bubble Sort) danh sách User theo totalSpent giảm dần
+    public static void sortUsersByTotalSpentDesc(List<User> users) {
+        int n = users.size();
+        boolean swapped;
+        for (int i = 0; i < n - 1; i++) {
+            swapped = false;
+            for (int j = 0; j < n - 1 - i; j++) {
+                // So sánh totalSpent, nếu user j nhỏ hơn user j+1 thì đổi chỗ
+                if (users.get(j).getTotalSpent() < users.get(j + 1).getTotalSpent()) {
+                    // Hoán đổi vị trí
+                    User temp = users.get(j);
+                    users.set(j, users.get(j + 1));
+                    users.set(j + 1, temp);
+                    swapped = true;
+                }
+            }
+            // Nếu không có hoán đổi nào trong lượt này -> danh sách đã sắp xếp
+            if (!swapped) break;
+        }
+    }
+
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Đọc số lượng test case (mặc dù ví dụ chỉ có 1)
+        int t = 1; // Mặc định là 1
+        if (scanner.hasNextLine()) {
+             try {
+                 t = Integer.parseInt(scanner.nextLine());
+             } catch (NumberFormatException e) {
+                 System.err.println("Invalid number of test cases, assuming 1.");
+             }
+         }
+
+
+        while(t-- > 0) {
+            // --- Nhiệm vụ 5: Tạo sản phẩm ---
+            Electronics laptop = new Electronics("laptop", 20, 10, "Dell");
+            Book harryPotter = new Book("Harry Potter", 10, 12, "camnh");
+
+            // --- Nhiệm vụ 5: Tạo User ---
+            User alice = new User("Alice");
+            User bob = new User("Bob");
+            User charlie = new User("Charlie");
+
+            List<User> userList = new ArrayList<>();
+            userList.add(alice);
+            userList.add(bob);
+            userList.add(charlie);
+
+            // --- Nhiệm vụ 5: Thực hiện mua hàng ---
+            alice.buyProduct(laptop, 3);
+            alice.buyProduct(harryPotter, 10);
+            bob.buyProduct(laptop, 1);
+            charlie.buyProduct(harryPotter, 5); // Sẽ báo lỗi không đủ hàng
+
+            System.out.println("====");
+
+            // --- Nhiệm vụ 5: Sắp xếp và In tổng chi của User giảm dần ---
+            sortUsersByTotalSpentDesc(userList); // Sắp xếp thủ công
+
+            System.out.println("Users with Highest Total Spent:");
+            for (int i = 0; i < userList.size(); i++) {
+                User user = userList.get(i);
+                // Sử dụng Locale.US để đảm bảo dấu thập phân là '.'
+                System.out.printf(Locale.US,"%d. %s: $%.1f\n", (i + 1), user.getUsername(), user.getTotalSpent());
+            }
+
+            System.out.println("====");
+
+            // --- Nhiệm vụ 5: In thông tin sản phẩm còn lại ---
+            laptop.displayDetails();
+            System.out.println("---"); // Phân cách giữa các sản phẩm
+            harryPotter.displayDetails();
+
+        } // Kết thúc vòng lặp test case
+
+        scanner.close();
+    }
+}
