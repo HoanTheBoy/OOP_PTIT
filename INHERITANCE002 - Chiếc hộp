@@ -1,0 +1,167 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects; // Import for potential use in equals/hashCode if needed
+
+// --- Task 1: Item Class ---
+class Item {
+    private String name;
+    private int weight;
+
+    // Constructor with name and weight
+    public Item(String name, int weight) {
+        this.name = name;
+        this.weight = weight;
+    }
+
+    // Constructor with only name (assuming default weight or weight not always needed)
+    // Let's assume weight is 0 if not provided, though it might not be used depending on context.
+    public Item(String name) {
+        this(name, 0); // Delegate to the other constructor
+    }
+
+    // Getters (Accessors)
+    public String getName() {
+        return name;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    // Optional: equals() and hashCode() are good practice if items need
+    // to be compared for equality based on content, especially in Sets/Maps.
+    // For this problem, comparing just the name in isInBox is sufficient as per task 3.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        // Primarily comparing by name as indicated by isInBox logic
+        return Objects.equals(name, item.name);
+        // If weight also mattered for equality:
+        // return weight == item.weight && Objects.equals(name, item.name);
+    }
+
+    @Override
+    public int hashCode() {
+        // Hash based on name, consistent with equals definition above
+        return Objects.hash(name);
+        // If weight also mattered:
+        // return Objects.hash(name, weight);
+    }
+}
+
+// --- Task 2: Abstract Box Class ---
+abstract class Box {
+    /**
+     * Adds an item to the box.
+     * Implementation depends on the specific type of box.
+     * @param item The item to add.
+     */
+    public abstract void add(Item item);
+
+    /**
+     * Checks if an item is present in the box.
+     * The definition of "present" depends on the specific type of box.
+     * @param item The item to check for.
+     * @return true if the item is considered to be in the box, false otherwise.
+     */
+    public abstract boolean isInBox(Item item);
+}
+
+// --- Task 3: BoxWithMaxWeight Class ---
+class BoxWithMaxWeight extends Box {
+    private List<Item> items; // Use List interface type
+    private final int maxWeight; // Maximum weight the box can hold
+
+    /**
+     * Constructs a BoxWithMaxWeight.
+     * @param maxWeight The maximum weight this box can contain.
+     */
+    public BoxWithMaxWeight(int maxWeight) {
+         if (maxWeight < 0) {
+              throw new IllegalArgumentException("Max weight cannot be negative.");
+         }
+        this.maxWeight = maxWeight;
+        this.items = new ArrayList<>(); // Initialize the list
+    }
+
+    /**
+     * Calculates the current total weight of items in the box.
+     * @return The sum of weights of all items currently in the box.
+     */
+    private int getCurrentWeight() {
+        int currentWeight = 0;
+        for (Item item : this.items) {
+            currentWeight += item.getWeight();
+        }
+        return currentWeight;
+    }
+
+    /**
+     * Adds an item to the box if adding it does not exceed the maxWeight.
+     * @param item The item to potentially add.
+     */
+    @Override
+    public void add(Item item) {
+         if (item == null) {
+             // Decide how to handle null items, maybe ignore or throw exception
+             return; // Ignoring null item
+         }
+        int currentWeight = getCurrentWeight();
+        // Check if the *new* total weight would exceed the maximum
+        if (currentWeight + item.getWeight() <= this.maxWeight) {
+            this.items.add(item);
+        }
+        // Otherwise, do nothing (item is not added).
+    }
+
+    /**
+     * Checks if an item with the same name as the given item exists in the box.
+     * @param item The item to check for (comparison is based on name).
+     * @return true if an item with the same name is found, false otherwise.
+     */
+    @Override
+    public boolean isInBox(Item item) {
+        if (item == null || item.getName() == null) {
+            return false; // Cannot check for null item or item with null name
+        }
+        String nameToCheck = item.getName();
+        for (Item existingItem : this.items) {
+             // Ensure existingItem and its name are not null before calling equals
+            if (existingItem != null && existingItem.getName() != null && existingItem.getName().equals(nameToCheck)) {
+                return true; // Found an item with the same name
+            }
+        }
+        return false; // No item with the same name found
+    }
+}
+
+// --- Task 4: Main Class ---
+public class Main { // Renamed class to Main
+
+    public static void main(String[] args) {
+        // Initialize the box with a max weight of 10
+        BoxWithMaxWeight box = new BoxWithMaxWeight(10);
+
+        // Create items to add
+        Item item1 = new Item("Saludo", 5);
+        Item item2 = new Item("Pirkka", 5);
+        Item item3 = new Item("Kopi Luwak", 5);
+
+        // Add items to the box
+        box.add(item1); // Current weight = 0. 0+5 <= 10. Added. Box weight = 5.
+        box.add(item2); // Current weight = 5. 5+5 <= 10. Added. Box weight = 10.
+        box.add(item3); // Current weight = 10. 10+5 > 10. Not added. Box weight = 10.
+
+        // Check if items are in the box (use new Item objects for checking, name matters)
+        Item checkItem1 = new Item("Saludo");
+        Item checkItem2 = new Item("Pirkka");
+        Item checkItem3 = new Item("Kopi Luwak");
+
+        // Print the results of isInBox checks
+        System.out.println(box.isInBox(checkItem1)); // Saludo was added -> true
+        System.out.println(box.isInBox(checkItem2)); // Pirkka was added -> true
+        System.out.println(box.isInBox(checkItem3)); // Kopi Luwak was not added -> false
+    }
+}
