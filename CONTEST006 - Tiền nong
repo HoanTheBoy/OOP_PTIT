@@ -1,0 +1,140 @@
+import java.util.Locale; // Import Locale for consistent decimal formatting
+
+/**
+ * Represents a monetary value in Euros and Cents.
+ * Task 1: Class Definition and toString()
+ */
+class Money {
+    private int euros;
+    private int cents;
+
+    /**
+     * Constructs a Money object.
+     * Normalizes cents (e.g., 150 cents becomes 1 euro and 50 cents).
+     * Assumes non-negative inputs based on problem scope.
+     * @param euros The whole euro amount.
+     * @param cents The cent amount (0-99 after normalization).
+     */
+    public Money(int euros, int cents) {
+        if (euros < 0 || cents < 0) {
+            // Handle negative inputs if necessary, problem implies non-negative
+            // For simplicity here, we assume non-negative inputs or treat them as 0
+            // Based on the minus logic resulting in 0, we'll default invalid negatives to 0
+             this.euros = 0;
+             this.cents = 0;
+             // Or throw an IllegalArgumentException("Money values cannot be negative");
+             return;
+        }
+        this.euros = euros + cents / 100; // Add full euros from cents
+        this.cents = cents % 100;         // Keep remaining cents (0-99)
+    }
+
+    public int getEuros() {
+        return euros;
+    }
+
+    public int getCents() {
+        return cents;
+    }
+
+    /**
+     * Returns a string representation of the money in the format "EE.CCe".
+     * Cents are always formatted to two digits.
+     * Example: 10 euros, 8 cents -> "10.08e"
+     *          10 euros, 50 cents -> "10.50e"
+     * @return The formatted string representation.
+     */
+    @Override
+    public String toString() {
+        // %d for euros, %02d for cents (padded with leading zero if needed)
+        return String.format(Locale.US, "%d.%02de", this.euros, this.cents);
+    }
+
+    /**
+     * Task 2: Adds another Money object to this one.
+     * @param added The Money object to add.
+     * @return A new Money object representing the sum.
+     */
+    public Money plus(Money added) {
+        int totalCents = this.cents + added.cents;
+        int totalEuros = this.euros + added.euros;
+
+        // Normalize the result before creating the new Money object
+        totalEuros += totalCents / 100;
+        totalCents = totalCents % 100;
+
+        return new Money(totalEuros, totalCents);
+    }
+
+    /**
+     * Task 3: Checks if this Money object's value is less than another's.
+     * @param compared The Money object to compare against.
+     * @return true if this Money is strictly less than compared Money, false otherwise.
+     */
+    public boolean lessThan(Money compared) {
+        // Compare total value in cents for simplicity and to avoid potential overflow issues
+        long thisTotalCents = (long)this.euros * 100 + this.cents;
+        long comparedTotalCents = (long)compared.euros * 100 + compared.cents;
+
+        return thisTotalCents < comparedTotalCents;
+    }
+
+    /**
+     * Task 4: Subtracts another Money object from this one.
+     * If the result would be negative, returns Money(0, 0).
+     * @param minus The Money object to subtract.
+     * @return A new Money object representing the difference, or 0.00e if the difference is negative.
+     */
+    public Money minus(Money minus) {
+        long thisTotalCents = (long)this.euros * 100 + this.cents;
+        long minusTotalCents = (long)minus.euros * 100 + minus.cents;
+
+        long differenceCents = thisTotalCents - minusTotalCents;
+
+        if (differenceCents < 0) {
+            return new Money(0, 0); // Return 0.00e as per example
+        } else {
+            int resultEuros = (int) (differenceCents / 100);
+            int resultCents = (int) (differenceCents % 100);
+            return new Money(resultEuros, resultCents);
+        }
+    }
+}
+
+// Main class to execute Task 5
+public class Main { // Class name changed to Main
+
+    public static void main(String[] args) {
+        // Task 5: Main execution block
+
+        // (1) Addition Example
+        Money a = new Money(10, 8);
+        Money b = new Money(5, 5);
+        Money c = a.plus(b); // Calculate c = a + b
+
+        System.out.println(a); // Expected: 10.08e
+        System.out.println(b); // Expected: 5.05e
+        System.out.println(c); // Expected: 15.13e
+
+        // (2) Comparison Example
+        Money u = new Money(10, 0);
+        Money y = new Money(3, 0);
+        Money w = new Money(5, 0);
+
+        System.out.println(u.lessThan(y)); // Expected: false (10 is not less than 3)
+        System.out.println(y.lessThan(w)); // Expected: true (3 is less than 5)
+
+        // (3) Subtraction Example
+        Money m = new Money(10, 0);
+        Money n = new Money(3, 50);
+        Money o = m.minus(n); // Calculate o = m - n
+
+        System.out.println(m); // Expected: 10.00e
+        System.out.println(n); // Expected: 3.50e
+        System.out.println(o); // Expected: 6.50e
+
+        // Continue calculation: o = o - m
+        o = o.minus(m); // 6.50e - 10.00e should result in 0.00e
+        System.out.println(o); // Expected: 0.00e
+    }
+}
