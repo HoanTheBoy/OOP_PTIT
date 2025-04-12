@@ -1,0 +1,183 @@
+import java.util.*; // For List, Map, Scanner, ArrayList, HashMap, Locale
+import java.util.regex.Pattern; // Optional: for more robust email check if needed
+
+class Employee {
+    private String name;
+    private double salary;
+    private String department;
+    private String email; // Can be null if not provided
+    private int age;    // Use -1 to indicate not provided
+
+    // Constructor for mandatory fields only
+    public Employee(String name, double salary, String department) {
+        this.name = name;
+        this.salary = salary;
+        this.department = department;
+        this.email = null; // Default email
+        this.age = -1;     // Default age
+    }
+
+    // Constructor with email
+    public Employee(String name, double salary, String department, String email) {
+        this(name, salary, department); // Call the basic constructor
+        this.email = email;
+    }
+
+    // Constructor with age
+    public Employee(String name, double salary, String department, int age) {
+        this(name, salary, department); // Call the basic constructor
+        this.age = age;
+    }
+
+    // Constructor with both email and age
+    public Employee(String name, double salary, String department, String email, int age) {
+        this(name, salary, department, email); // Call constructor with email
+        this.age = age;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public String getEmail() {
+        // Return "n/a" if email is null, otherwise return the email
+        return (this.email == null) ? "n/a" : this.email;
+    }
+
+    public int getAge() {
+        // Age is already stored as -1 if not provided
+        return age;
+    }
+
+    // Optional: toString for debugging
+    @Override
+    public String toString() {
+        return "Employee{" +
+               "name='" + name + '\'' +
+               ", salary=" + salary +
+               ", department='" + department + '\'' +
+               ", email='" + getEmail() + '\'' + // Use getter to handle n/a
+               ", age=" + getAge() +            // Use getter to ensure -1
+               '}';
+    }
+}
+
+public class Main { // Class name changed to Main
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Ensure decimal separator is '.' regardless of system locale
+        scanner.useLocale(Locale.US);
+
+        int n = Integer.parseInt(scanner.nextLine()); // Read number of employees
+
+        // Map to store employees grouped by department
+        Map<String, List<Employee>> employeesByDepartment = new HashMap<>();
+
+        for (int i = 0; i < n; i++) {
+            String line = scanner.nextLine();
+            String[] parts = line.split("\\s+"); // Split by one or more spaces
+
+            // --- Parse mandatory fields ---
+            String name = parts[0];
+            double salary = Double.parseDouble(parts[1]);
+            String department = parts[2];
+
+            // --- Parse optional fields ---
+            String email = null;
+            int age = -1; // Default age
+
+            if (parts.length == 4) {
+                // Could be email or age
+                try {
+                    // Try parsing as age first
+                    age = Integer.parseInt(parts[3]);
+                } catch (NumberFormatException e) {
+                    // If not a number, assume it's email
+                    email = parts[3];
+                }
+            } else if (parts.length >= 5) {
+                // Assume email is parts[3] and age is parts[4]
+                email = parts[3];
+                try {
+                     age = Integer.parseInt(parts[4]);
+                } catch (NumberFormatException e) {
+                    // Handle cases where the 5th part might not be a valid integer
+                     System.err.println("Warning: Could not parse age from " + parts[4] + " for employee " + name);
+                     age = -1; // Revert to default if parsing fails
+                }
+            }
+
+            // --- Create Employee object ---
+            // No need for multiple constructors if we handle defaults here
+            Employee employee = new Employee(name, salary, department);
+             if(email != null) employee = new Employee(name, salary, department, email, age); // Use specific constructor if email exists
+             else if (age != -1) employee = new Employee(name, salary, department, age); // Use specific constructor if only age exists besides mandatory
+             // Otherwise the basic employee object with defaults is fine
+
+
+            // --- Add employee to the map ---
+            // Get the list for the department, or create a new list if it doesn't exist
+            employeesByDepartment.computeIfAbsent(department, k -> new ArrayList<>()).add(employee);
+        }
+
+        // --- Find department with highest average salary ---
+        String bestDepartment = "";
+        double highestAverageSalary = -1.0; // Initialize with a value lower than any possible average
+
+        for (Map.Entry<String, List<Employee>> entry : employeesByDepartment.entrySet()) {
+            String department = entry.getKey();
+            List<Employee> employeesInDept = entry.getValue();
+
+            if (employeesInDept.isEmpty()) {
+                continue; // Should not happen based on input logic, but safe check
+            }
+
+            double totalSalary = 0;
+            for (Employee emp : employeesInDept) {
+                totalSalary += emp.getSalary();
+            }
+            double currentAverage = totalSalary / employeesInDept.size();
+
+            if (currentAverage > highestAverageSalary) {
+                highestAverageSalary = currentAverage;
+                bestDepartment = department;
+            }
+        }
+
+        // --- Print results ---
+        if (!bestDepartment.isEmpty()) { // Check if a best department was found
+            System.out.println("Highest Average Salary: " + bestDepartment);
+
+            // Get the list of employees from the best department
+            List<Employee> employeesToPrint = employeesByDepartment.get(bestDepartment);
+
+            // Optional: Sort employees in the best department by salary descending
+            // employeesToPrint.sort((e1, e2) -> Double.compare(e2.getSalary(), e1.getSalary()));
+
+            // Print employee details
+            for (Employee emp : employeesToPrint) {
+                // Use Locale.US to ensure '.' as decimal separator and %.2f for format
+                System.out.printf(Locale.US, "%s %.2f %s %d\n",
+                                  emp.getName(),
+                                  emp.getSalary(),
+                                  emp.getEmail(), // Getter handles "n/a"
+                                  emp.getAge());    // Getter returns -1 if not set
+            }
+        } else {
+             System.out.println("No employee data found."); // Handle case where N=0 or input was empty
+        }
+
+
+        scanner.close();
+    }
+}
