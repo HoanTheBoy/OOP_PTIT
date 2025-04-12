@@ -1,0 +1,208 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Iterator; // Needed for safe removal during iteration
+
+// --- Pokemon Class ---
+class Pokemon {
+    private String name;
+    private String element;
+    private int health;
+
+    public Pokemon(String name, String element, int health) {
+        this.name = name;
+        this.element = element;
+        this.health = health;
+    }
+
+    public String getElement() {
+        return element;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void decreaseHealth(int amount) {
+        this.health -= amount;
+    }
+
+    // Optional: Getters for name if needed elsewhere
+    public String getName() {
+        return name;
+    }
+}
+
+// --- Trainer Class ---
+class Trainer {
+    private String name;
+    private int numberOfBadges;
+    private List<Pokemon> pokemonCollection;
+
+    public Trainer(String name) {
+        this.name = name;
+        this.numberOfBadges = 0;
+        this.pokemonCollection = new ArrayList<>();
+    }
+
+    public void addPokemon(Pokemon pokemon) {
+        this.pokemonCollection.add(pokemon);
+    }
+
+    /**
+     * Checks if the trainer has a Pokemon of the given element.
+     * Awards a badge if found. Otherwise, decreases health of all Pokemon
+     * and removes any that have fainted.
+     *
+     * @param element The element to check for ("Fire", "Water", "Electricity").
+     */
+    public void checkElement(String element) {
+        boolean hasElement = false;
+        for (Pokemon pokemon : pokemonCollection) {
+            if (pokemon.getElement().equals(element)) {
+                hasElement = true;
+                break; // Found at least one, no need to check further
+            }
+        }
+
+        if (hasElement) {
+            this.numberOfBadges++;
+        } else {
+            // Decrease health for all Pokemon if no match was found
+            for (Pokemon pokemon : pokemonCollection) {
+                pokemon.decreaseHealth(10);
+            }
+
+            // Remove fainted Pokemon (health <= 0) using an Iterator for safe removal
+            Iterator<Pokemon> iterator = pokemonCollection.iterator();
+            while (iterator.hasNext()) {
+                Pokemon pokemon = iterator.next();
+                if (pokemon.getHealth() <= 0) {
+                    iterator.remove(); // Safely remove the current element
+                }
+            }
+            // Alternative using Java 8 streams/removeIf (often cleaner):
+            // pokemonCollection.removeIf(pokemon -> pokemon.getHealth() <= 0);
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getNumberOfBadges() {
+        return numberOfBadges;
+    }
+
+    public int getNumberOfPokemon() {
+        return pokemonCollection.size();
+    }
+
+    // Override toString for easy printing in the desired format later (optional)
+    @Override
+    public String toString() {
+        return name + " " + numberOfBadges + " " + getNumberOfPokemon();
+    }
+}
+
+// --- Main Class ---
+public class Main { // Changed class name to Main
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Use a Map for quick lookup of trainers by name
+        Map<String, Trainer> trainerMap = new HashMap<>();
+        // Use a List to maintain the original insertion order for tie-breaking
+        List<Trainer> trainersInOrder = new ArrayList<>();
+
+        // --- Phase 1: Read Trainer and Pokemon data ---
+        String line;
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+            if (line.equals("Tournament")) {
+                break;
+            }
+
+            String[] parts = line.split("\\s+"); // Split by one or more spaces
+            if (parts.length != 4) {
+                // Handle potential invalid input format if necessary
+                System.err.println("Skipping invalid input line: " + line);
+                continue;
+            }
+
+            String trainerName = parts[0];
+            String pokemonName = parts[1];
+            String pokemonElement = parts[2];
+            int pokemonHealth;
+            try {
+                 pokemonHealth = Integer.parseInt(parts[3]);
+            } catch (NumberFormatException e) {
+                System.err.println("Skipping invalid health value: " + line);
+                continue;
+            }
+
+
+            Pokemon newPokemon = new Pokemon(pokemonName, pokemonElement, pokemonHealth);
+
+            // Get existing trainer or create a new one
+            Trainer currentTrainer = trainerMap.get(trainerName);
+            if (currentTrainer == null) {
+                currentTrainer = new Trainer(trainerName);
+                trainerMap.put(trainerName, currentTrainer);
+                trainersInOrder.add(currentTrainer); // Add to list maintaining order
+            }
+
+            currentTrainer.addPokemon(newPokemon);
+        }
+
+        // --- Phase 2: Process Tournament Rounds ---
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+            if (line.equals("End")) {
+                break;
+            }
+
+            String element = line; // Should be "Fire", "Water", or "Electricity"
+
+            // Apply the element check to ALL trainers
+            for (Trainer trainer : trainersInOrder) { // Iterate using the ordered list
+                trainer.checkElement(element);
+            }
+        }
+
+        // --- Phase 3: Sort Trainers (without Comparator) ---
+        // Using Bubble Sort for simplicity, respecting the no-Comparator rule
+        // Sorts in descending order of badges. Maintains relative order for ties.
+        int n = trainersInOrder.size();
+        boolean swapped;
+        for (int i = 0; i < n - 1; i++) {
+            swapped = false;
+            for (int j = 0; j < n - 1 - i; j++) {
+                Trainer trainer1 = trainersInOrder.get(j);
+                Trainer trainer2 = trainersInOrder.get(j + 1);
+
+                // Swap if trainer1 has fewer badges than trainer2
+                if (trainer1.getNumberOfBadges() < trainer2.getNumberOfBadges()) {
+                    // Perform swap
+                    trainersInOrder.set(j, trainer2);
+                    trainersInOrder.set(j + 1, trainer1);
+                    swapped = true;
+                }
+            }
+            // If no two elements were swapped by inner loop, then break
+            if (!swapped) break;
+        }
+
+
+        // --- Phase 4: Print Results ---
+        for (Trainer trainer : trainersInOrder) {
+            System.out.println(trainer.getName() + " " + trainer.getNumberOfBadges() + " " + trainer.getNumberOfPokemon());
+            // Or if you used the toString override: System.out.println(trainer);
+        }
+
+        scanner.close();
+    }
+}
