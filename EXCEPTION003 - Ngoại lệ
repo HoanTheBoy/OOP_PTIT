@@ -1,0 +1,231 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+
+/**
+ * Lớp ngoại lệ tùy chỉnh cho dữ liệu UsedCar không hợp lệ.
+ */
+class UsedCarException extends Exception {
+    /**
+     * Xây dựng một UsedCarException mới với VIN được chỉ định làm thông báo chi tiết.
+     * @param vin Số Nhận dạng Xe (VIN) gây ra lỗi xác thực.
+     */
+    public UsedCarException(String vin) {
+        // Truyền VIN vào hàm tạo của lớp Exception cha.
+        // Điều này làm cho VIN có sẵn thông qua getMessage().
+        super(vin);
+    }
+}
+
+/**
+ * Đại diện cho một chiếc xe đã qua sử dụng với logic xác thực trong hàm tạo.
+ */
+class UsedCar {
+
+    // --- Hằng số để Xác thực ---
+    private static final int VIN_LENGTH = 4;
+    private static final int MIN_YEAR = 1990;
+    private static final int MAX_YEAR = 2014;
+    // Sử dụng Set để kiểm tra hiệu quả các hãng sản xuất được phép
+    private static final Set<String> ALLOWED_MAKES = new HashSet<>(Arrays.asList(
+            "Ford", "Honda", "Toyota", "Chrysler"
+    ));
+
+    // --- Trường Instance ---
+    private String vin;
+    private String make;
+    private int year;
+    private int mileage; // Giả sử số dặm là số nguyên
+    private double price;
+
+    /**
+     * Hàm tạo cho UsedCar. Thực hiện xác thực và ném UsedCarException nếu không hợp lệ.
+     *
+     * @param vin     Số Nhận dạng Xe (String, dự kiến 4 chữ số).
+     * @param make    Hãng sản xuất xe (String).
+     * @param yearStr Năm sản xuất (String, dự kiến là số).
+     * @param mileageStr Số dặm đã đi (String, dự kiến là số).
+     * @param priceStr Giá xe (String, dự kiến là số).
+     * @throws UsedCarException Nếu bất kỳ quy tắc xác thực nào bị vi phạm.
+     */
+    public UsedCar(String vin, String make, String yearStr, String mileageStr, String priceStr) throws UsedCarException {
+
+        // 1. Xác thực VIN
+        // Phải có đúng 4 ký tự và tất cả đều là chữ số.
+        if (vin == null || vin.length() != VIN_LENGTH || !vin.matches("\\d+")) {
+            throw new UsedCarException(vin != null ? vin : "NULL_VIN"); // Xử lý trường hợp null cho thông báo lỗi
+        }
+
+        // 2. Xác thực Hãng sản xuất (Make)
+        if (make == null || !ALLOWED_MAKES.contains(make)) {
+            throw new UsedCarException(vin);
+        }
+
+        // 3. Xác thực Năm sản xuất (Year)
+        int parsedYear;
+        try {
+            parsedYear = Integer.parseInt(yearStr);
+            if (parsedYear < MIN_YEAR || parsedYear > MAX_YEAR) {
+                throw new UsedCarException(vin);
+            }
+        } catch (NumberFormatException e) {
+            // Năm không phải là chuỗi số nguyên hợp lệ
+            throw new UsedCarException(vin);
+        }
+
+        // 4. Xác thực Số dặm (Mileage)
+        int parsedMileage;
+        try {
+            parsedMileage = Integer.parseInt(mileageStr);
+            if (parsedMileage < 0) { // Không được âm
+                throw new UsedCarException(vin);
+            }
+        } catch (NumberFormatException e) {
+            // Số dặm không phải là chuỗi số nguyên hợp lệ
+            throw new UsedCarException(vin);
+        }
+
+        // 5. Xác thực Giá (Price)
+        double parsedPrice;
+        try {
+            parsedPrice = Double.parseDouble(priceStr);
+            if (parsedPrice < 0.0) { // Không được âm
+                throw new UsedCarException(vin);
+            }
+        } catch (NumberFormatException e) {
+            // Giá không phải là chuỗi số hợp lệ
+            throw new UsedCarException(vin);
+        }
+
+        // --- Nếu tất cả xác thực đều vượt qua, gán giá trị ---
+        this.vin = vin;
+        this.make = make;
+        this.year = parsedYear;
+        this.mileage = parsedMileage;
+        this.price = parsedPrice;
+    }
+
+    // --- Getters (Tùy chọn nhưng là thực hành tốt) ---
+    public String getVin() { return vin; }
+    public String getMake() { return make; }
+    public int getYear() { return year; }
+    public int getMileage() { return mileage; }
+    public double getPrice() { return price; }
+
+
+    /**
+     * Trả về biểu diễn chuỗi của đối tượng UsedCar theo định dạng được chỉ định.
+     * Giá được định dạng thành một chữ số thập phân.
+     *
+     * @return Biểu diễn chuỗi đã định dạng.
+     */
+    @Override
+    public String toString() {
+        // Sử dụng String.format để định dạng chính xác, đặc biệt là giá (%.1f)
+        return String.format("UsedCar{vin='%s', make='%s', year=%d, mileage=%d, price=%.1f}",
+                             vin, make, year, mileage, price);
+    }
+}
+
+// Lớp chính chứa phương thức main - phải là public và khớp tên file
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int numTestCases;
+
+        // Đọc số lượng test case một cách an toàn
+        try {
+            if (scanner.hasNextLine()) {
+                 numTestCases = Integer.parseInt(scanner.nextLine());
+            } else {
+                System.err.println("Input is empty.");
+                scanner.close();
+                return;
+            }
+
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid number of test cases.");
+            scanner.close();
+            return; // Thoát nếu dòng đầu tiên không hợp lệ
+        }
+
+        List<UsedCar> successfullyConstructedCars = new ArrayList<>();
+
+        // Xử lý từng dòng test case
+        for (int i = 0; i < numTestCases; i++) {
+             if (!scanner.hasNextLine()) {
+                 // Nếu không còn dòng nào nhưng vòng lặp vẫn chạy
+                 // (ví dụ: số test case lớn hơn số dòng dữ liệu)
+                 // Có thể in lỗi hoặc chỉ dừng lại
+                 // System.err.println("Warning: Expected more input lines.");
+                 break;
+             }
+            String line = scanner.nextLine().trim();
+            if (line.isEmpty()) {
+                // Bỏ qua các dòng trống nếu có
+                continue;
+            }
+
+            String[] parts = line.split(",");
+            String vinToReport = "UNKNOWN_VIN"; // VIN mặc định để báo lỗi nếu split thất bại
+
+            // Kiểm tra cơ bản số lượng phần tử sau khi split
+            if (parts.length != 5) {
+                 if (parts.length > 0 && !parts[0].trim().isEmpty()) {
+                    vinToReport = parts[0].trim(); // Sử dụng phần tử đầu tiên làm VIN nếu có
+                 } else if (line.contains(",")) {
+                     // Nếu có dấu phẩy nhưng phần đầu trống
+                     vinToReport = "(empty)";
+                 } else {
+                     // Nếu không có dấu phẩy, coi cả dòng là VIN (hoặc một phần của nó)
+                     vinToReport = line.substring(0, Math.min(line.length(), 10)); // Lấy một phần để tránh quá dài
+                 }
+                 System.out.println("Invalid UsedCar: VIN " + vinToReport);
+                 continue; // Chuyển sang dòng tiếp theo
+            }
+
+            // Trích xuất các phần dữ liệu (loại bỏ khoảng trắng thừa)
+            String vin = parts[0].trim();
+            String make = parts[1].trim();
+            String yearStr = parts[2].trim();
+            String mileageStr = parts[3].trim();
+            String priceStr = parts[4].trim();
+
+            // Cố gắng tạo đối tượng UsedCar
+            try {
+                // Thử tạo instance của UsedCar. Hàm tạo sẽ xử lý việc xác thực.
+                UsedCar car = new UsedCar(vin, make, yearStr, mileageStr, priceStr);
+                // Nếu thành công (không có ngoại lệ), thêm vào danh sách
+                successfullyConstructedCars.add(car);
+            } catch (UsedCarException e) {
+                // Nếu UsedCarException được ném ra bởi hàm tạo, in thông báo không hợp lệ theo yêu cầu.
+                // Sử dụng biến 'vin' đã lấy từ dòng nhập liệu cho thông báo.
+                 System.out.println("Invalid UsedCar: VIN " + vin);
+            } catch (Exception generalError) {
+                // Bắt các lỗi không mong muốn khác trong quá trình xử lý trước hàm tạo
+                // (Ví dụ: lỗi phân tích cú pháp nghiêm trọng bên ngoài hàm tạo)
+                // Sử dụng VIN đã trích xuất cho thông báo lỗi chuẩn.
+                System.out.println("Invalid UsedCar: VIN " + vin);
+                // Tùy chọn: In stack trace để debug: generalError.printStackTrace();
+            }
+        }
+
+        // Sau khi xử lý tất cả các dòng, in tiêu đề cho danh sách thành công
+        System.out.println("List of successfully constructed UsedCar objects:");
+
+        // In ra các xe đã được tạo thành công hoặc thông báo "No used cars"
+        if (successfullyConstructedCars.isEmpty()) {
+            System.out.println("No used cars");
+        } else {
+            for (UsedCar car : successfullyConstructedCars) {
+                System.out.println(car); // Sử dụng phương thức toString() đã được ghi đè
+            }
+        }
+
+        scanner.close(); // Đóng tài nguyên Scanner
+    }
+}
