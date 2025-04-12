@@ -1,0 +1,137 @@
+import java.util.Scanner;
+import java.util.regex.Pattern; // Sử dụng cho regex kiểm tra số điện thoại
+
+// Interface cho chức năng gọi điện
+interface Callable {
+    /**
+     * Thực hiện cuộc gọi đến một số điện thoại.
+     * In ra "Calling... <number>" nếu hợp lệ.
+     * In ra "Invalid number!" nếu không hợp lệ.
+     * @param number Số điện thoại cần gọi (dạng String).
+     */
+    void call(String number);
+}
+
+// Interface cho chức năng duyệt web
+interface Browsable {
+    /**
+     * Thực hiện duyệt một trang web.
+     * In ra "Browsing: <url>!" nếu hợp lệ.
+     * In ra "Invalid URL!" nếu không hợp lệ (chứa số).
+     * @param url Địa chỉ trang web cần duyệt (dạng String).
+     */
+    void browse(String url);
+}
+
+// Lớp Smartphone triển khai cả hai interface
+class Smartphone implements Callable, Browsable {
+
+    // Biểu thức chính quy để kiểm tra xem chuỗi có chỉ chứa chữ số hay không
+    // \\d+ khớp với một hoặc nhiều chữ số từ đầu đến cuối chuỗi.
+    private static final Pattern PHONE_NUMBER_PATTERN = Pattern.compile("\\d+");
+
+    /**
+     * Triển khai phương thức gọi điện từ interface Callable.
+     * Kiểm tra xem số điện thoại có hợp lệ không (chỉ chứa chữ số).
+     */
+    @Override
+    public void call(String number) {
+        if (number != null && PHONE_NUMBER_PATTERN.matcher(number).matches()) {
+            System.out.println("Calling... " + number);
+        } else {
+            System.out.println("Invalid number!");
+        }
+    }
+
+    /**
+     * Triển khai phương thức duyệt web từ interface Browsable.
+     * Kiểm tra xem URL có hợp lệ không (không chứa chữ số).
+     */
+    @Override
+    public void browse(String url) {
+        if (url == null) {
+             System.out.println("Invalid URL!"); // Hoặc xử lý khác nếu cần
+             return;
+        }
+
+        boolean hasDigit = false;
+        for (char c : url.toCharArray()) {
+            if (Character.isDigit(c)) {
+                hasDigit = true;
+                break; // Tìm thấy số là đủ, không cần kiểm tra thêm
+            }
+        }
+
+        if (hasDigit) {
+            System.out.println("Invalid URL!");
+        } else {
+            System.out.println("Browsing: " + url + "!");
+        }
+    }
+}
+
+// Lớp chính để chạy chương trình
+public class Main { // Đặt tên class là Main
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Đọc số lượng test case (mặc dù ví dụ chỉ có 1, nhưng đề bài nói có)
+        int t = 1; // Mặc định là 1 nếu không có dòng nhập số test case
+         if (scanner.hasNextLine()) {
+             try {
+                 t = Integer.parseInt(scanner.nextLine());
+             } catch (NumberFormatException e) {
+                 // Nếu dòng đầu không phải số, giả sử nó là dòng số điện thoại
+                 // và chỉ có 1 test case. Cần đọc lại dòng này.
+                 // Dòng này hơi phức tạp, đơn giản là giả định đề bài luôn
+                 // có dòng số test case đúng nếu t > 1.
+                 // Nếu chỉ có 1 test case, dòng đầu có thể là data luôn.
+                 // -> Cách an toàn nhất là tuân thủ format đề bài chặt chẽ.
+                 // -> Giả sử dòng đầu luôn là số test case.
+                 System.err.println("Lỗi đọc số lượng test case, giả sử là 1.");
+             }
+         }
+
+
+        while (t-- > 0) {
+            // Đọc danh sách số điện thoại
+            String phoneLine = "";
+            if (scanner.hasNextLine()) {
+                 phoneLine = scanner.nextLine();
+            }
+
+            // Đọc danh sách URLs
+            String urlLine = "";
+             if (scanner.hasNextLine()) {
+                 urlLine = scanner.nextLine();
+             }
+
+
+            // Tách chuỗi thành mảng các số và URLs
+            // Sử dụng "\\s+" để tách bằng một hoặc nhiều khoảng trắng, tránh các phần tử rỗng
+            String[] numbers = phoneLine.split("\\s+");
+            String[] urls = urlLine.split("\\s+");
+
+            // Tạo đối tượng Smartphone
+            Smartphone phone = new Smartphone();
+
+            // Thực hiện gọi điện
+            for (String number : numbers) {
+                 // Bỏ qua các phần tử rỗng có thể sinh ra do split nếu dòng bắt đầu/kết thúc bằng space
+                if (!number.isEmpty()) {
+                    phone.call(number);
+                }
+            }
+
+            // Thực hiện duyệt web
+            for (String url : urls) {
+                 if (!url.isEmpty()) {
+                    phone.browse(url);
+                 }
+            }
+        }
+
+        scanner.close(); // Đóng scanner
+    }
+}
