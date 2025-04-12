@@ -1,0 +1,62 @@
+import java.util.Scanner;
+
+public class Main { // Đặt tên class là Main
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = Integer.parseInt(sc.nextLine()); // Đọc số lượng test case
+
+        while (t-- > 0) {
+            String[] inputLine = sc.nextLine().split(" ");
+            int k = Integer.parseInt(inputLine[0]); // Đọc k
+            int n = Integer.parseInt(inputLine[1]); // Đọc n
+            int goal = Integer.parseInt(inputLine[2]); // Đọc goal
+
+            // Gọi hàm giải quyết và in kết quả
+            System.out.println(solve(n, goal, k));
+        }
+        sc.close();
+    }
+
+    public static long solve(int n, int goal, int k) {
+        long MOD = 1_000_000_007;
+
+        // dp[i][j]: số cách tạo playlist dài i, dùng đúng j bài hát khác nhau
+        long[][] dp = new long[goal + 1][n + 1];
+
+        // Điều kiện cơ sở
+        dp[0][0] = 1;
+
+        // Bắt đầu tính toán DP
+        for (int i = 1; i <= goal; i++) { // i: độ dài playlist hiện tại
+            for (int j = 1; j <= n; j++) { // j: số lượng bài hát khác nhau đã dùng
+
+                long term1 = 0; // Số cách khi bài hát thứ i là bài mới
+                long term2 = 0; // Số cách khi bài hát thứ i là bài lặp lại
+
+                // Trường hợp 1: Bài hát thứ i là bài hát mới
+                // Phải đến từ trạng thái (i-1, j-1)
+                // Có (n - (j-1)) lựa chọn cho bài hát mới này
+                if (j > 0) { // Đảm bảo chỉ số j-1 hợp lệ
+                    term1 = (dp[i - 1][j - 1] * (n - j + 1)) % MOD;
+                }
+
+
+                // Trường hợp 2: Bài hát thứ i là bài hát lặp lại
+                // Phải đến từ trạng thái (i-1, j)
+                // Có max(0, j - k) lựa chọn cho bài hát lặp lại
+                if (j > k) { // Chỉ có thể lặp lại nếu số bài hát đã dùng > k
+                   term2 = (dp[i - 1][j] * (j - k)) % MOD;
+                } else {
+                   term2 = 0; // Không thể lặp lại nếu j <= k
+                }
+
+                // Tổng số cách cho dp[i][j]
+                dp[i][j] = (term1 + term2) % MOD;
+            }
+        }
+
+        // Kết quả cuối cùng là số cách tạo playlist dài 'goal' dùng đúng 'n' bài hát
+        return dp[goal][n];
+    }
+}
