@@ -1,0 +1,311 @@
+import java.util.*; // For Scanner, List, Map, ArrayList, HashMap, Locale
+import java.text.SimpleDateFormat; // If using SimpleDateFormat alternative
+import java.text.ParseException;  // If using SimpleDateFormat alternative
+import java.util.Date;            // If using SimpleDateFormat alternative
+
+/**
+ * Represents a single note with an ID, content, and creation date.
+ */
+// Note: Removed 'public' keyword
+class Note {
+    private int id;
+    private String content;
+    private String dateStr; // Stores the original "MMMDDYY" date string
+
+    public Note(int id, String dateStr, String content) {
+        this.id = id;
+        this.dateStr = dateStr;
+        this.content = content;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    /**
+     * Formats the stored date string ("MMMDDYY") into "DD MMM YY" format.
+     * Example: "Jan0123" -> "01 Jan 23"
+     * Returns the original string if parsing fails or format is unexpected.
+     *
+     * @return Formatted date string or original string on error.
+     */
+    public String getFormattedDate() {
+        if (dateStr == null || dateStr.length() != 7) {
+            return dateStr; // Return original if format is clearly wrong
+        }
+        try {
+            String monthStr = dateStr.substring(0, 3);
+            String dayStr = dateStr.substring(3, 5);
+            String yearStr = dateStr.substring(5, 7);
+
+            // Simple rearrangement assuming valid MMM, DD, YY components
+            return String.format("%s %s %s", dayStr, monthStr, yearStr);
+
+        } catch (IndexOutOfBoundsException e) {
+             // Catch potential errors if substring operations fail
+             // System.err.println("Warning: Error formatting date substring: " + dateStr); // Optional debug
+            return dateStr; // Fallback
+        }
+    }
+
+    // toString (optional for debugging)
+    @Override
+    public String toString() {
+        return "Note{" +
+               "id=" + id +
+               ", date='" + getFormattedDate() + '\'' +
+               ", content='" + content + '\'' +
+               '}';
+    }
+}
+
+/**
+ * Represents a user account with an ID, name, and a list of notes.
+ */
+// Note: Removed 'public' keyword
+class Account {
+    private String id;
+    private String accountName;
+    private List<Note> notes;
+    private int nextNoteId; // Counter for note IDs specific to this account
+
+    private static int nextAccountId = 1; // Static counter for generating account IDs
+
+    /**
+     * Creates a new Account with a unique ID and the given name.
+     * Resets the static counter ONLY if we are starting a new set of test cases
+     * (This might be needed depending on how the judge runs tests, but usually not)
+     */
+    public Account(String accountName) {
+        this.id = String.format("%03d", nextAccountId++); // Format ID as "001", "002", etc.
+        this.accountName = accountName;
+        this.notes = new ArrayList<>();
+        this.nextNoteId = 1; // Each account starts its note ID counter at 1
+    }
+
+     // Method to reset static counter if needed between independent test cases run by judge
+     public static void resetAccountCounter() {
+         nextAccountId = 1;
+     }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public List<Note> getNotes() {
+        return notes;
+    }
+
+    /**
+     * Adds a new note to this account's note list.
+     * Assigns the next available note ID for this account.
+     * @param dateStr The date string ("MMMDDYY").
+     * @param content The content of the note.
+     */
+    public void addNote(String dateStr, String content) {
+        Note newNote = new Note(this.nextNoteId, dateStr, content);
+        this.notes.add(newNote);
+        this.nextNoteId++; // Increment the counter for the *next* note in this account
+    }
+
+    /**
+     * Finds a note within this account's list by its ID.
+     * @param noteId The ID of the note to find.
+     * @return The Note object if found, otherwise null.
+     */
+    public Note findNoteById(int noteId) {
+        for (Note note : this.notes) {
+            if (note.getId() == noteId) {
+                return note;
+            }
+        }
+        return null; // Note not found in this account
+    }
+
+    /**
+     * Adds a reference to an existing Note object (presumably shared from another account)
+     * to this account's list. Increments the receiving account's nextNoteId counter
+     * as per the requirement that the ID pool is consumed on add or share.
+     * @param noteToReceive The Note object being shared.
+     */
+    public void receiveSharedNote(Note noteToReceive) {
+        if (noteToReceive != null) {
+            boolean alreadyExists = false;
+            for (Note existingNote : this.notes) {
+                // Check if the exact same note object reference is already present
+                // to avoid adding duplicates if shared multiple times to the same account.
+                if (existingNote == noteToReceive) {
+                    alreadyExists = true;
+                    break;
+                }
+            }
+            if (!alreadyExists) {
+                 this.notes.add(noteToReceive);
+                 // *** THE KEY CHANGE IS HERE ***
+                 // Increment the receiving account's note ID counter because
+                 // receiving a shared note consumes an ID slot according to the rules.
+                 this.nextNoteId++;
+            }
+        }
+    }
+}
+
+// The main public class matching the filename
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Map<String, Account> accountsById = new HashMap<>();
+        List<Account> accountsInOrder = new ArrayList<>();
+        // Reset static counter in case the judge reuses the environment for multiple test files
+        Account.resetAccountCounter();
+
+        boolean validInput = true; // Flag to track if any input was invalid
+
+        try {
+            // 1. Read number of accounts and create them
+            if (!scanner.hasNextLine()) {
+                 System.out.println("invalid input");
+                 scanner.close();
+                 return;
+            }
+            String nStr = scanner.nextLine();
+            int n;
+             try {
+                 n = Integer.parseInt(nStr);
+                 if (n < 0) throw new NumberFormatException(); // Treat negative n as invalid
+             } catch (NumberFormatException e) {
+                 System.out.println("invalid input");
+                 scanner.close();
+                 return;
+             }
+
+
+            for (int i = 0; i < n; i++) {
+                 if (!scanner.hasNextLine()) {
+                      validInput = false; // Mark as invalid
+                      break; // Stop processing if not enough names
+                 }
+                String accountName = scanner.nextLine();
+                if (accountName == null || accountName.trim().isEmpty()) {
+                     validInput = false; // Mark as invalid
+                     break; // Stop processing on empty name
+                }
+                Account newAccount = new Account(accountName);
+                accountsById.put(newAccount.getId(), newAccount);
+                accountsInOrder.add(newAccount);
+            }
+
+            // 2. Process commands (Add/Share) only if initial input was valid
+            while (validInput && scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line == null || line.trim().isEmpty()) continue; // Skip empty lines
+
+                String[] parts = line.split("\\s+", 3); // Split into max 3 parts: ID, Command, Rest
+
+                if (parts.length < 3) {
+                    validInput = false; // Mark as invalid
+                    break; // Stop processing
+                }
+
+                String accountId = parts[0];
+                String command = parts[1];
+                String contentPart = parts[2];
+
+                Account sourceAccount = accountsById.get(accountId);
+                if (sourceAccount == null) {
+                    validInput = false; // Mark as invalid
+                    break; // Stop processing
+                }
+
+                if ("Add".equalsIgnoreCase(command)) {
+                    String[] addParts = contentPart.split("\\s+", 2);
+                    if (addParts.length < 2) {
+                        validInput = false; break;
+                    }
+                    String dateStr = addParts[0];
+                    String noteContent = addParts[1];
+
+                    if (dateStr.length() != 7) { // Basic date format validation
+                         validInput = false; break;
+                    }
+                    // Potential stricter date validation could go here
+
+                    sourceAccount.addNote(dateStr, noteContent);
+
+                } else if ("Share".equalsIgnoreCase(command)) {
+                    String[] shareParts = contentPart.split("\\s+", 2);
+                    if (shareParts.length < 2) {
+                        validInput = false; break;
+                    }
+                    String targetAccountId = shareParts[0];
+                    String noteIdStr = shareParts[1];
+
+                    Account targetAccount = accountsById.get(targetAccountId);
+                    if (targetAccount == null) {
+                        validInput = false; break;
+                    }
+
+                    try {
+                        int noteId = Integer.parseInt(noteIdStr);
+                        if (noteId <= 0) {
+                             validInput = false; break;
+                        }
+
+                        Note noteToShare = sourceAccount.findNoteById(noteId);
+                        if (noteToShare == null) {
+                            // Silently ignore as per previous logic - don't mark as invalid input
+                            continue;
+                        }
+
+                        targetAccount.receiveSharedNote(noteToShare);
+
+                    } catch (NumberFormatException e) {
+                        validInput = false; break;
+                    }
+                } else {
+                    validInput = false; // Invalid command
+                    break;
+                }
+            }
+
+            // 3. Print Output
+            if (!validInput) {
+                System.out.println("invalid input");
+            } else {
+                // Only print detailed output if all input was valid
+                for (Account acc : accountsInOrder) {
+                    System.out.println("Account: " + acc.getAccountName());
+                    List<Note> notes = acc.getNotes();
+                    // Sorting notes might be necessary if the order matters and sharing messes it up
+                    // Example: Sort by note ID (might reflect creation/sharing order somewhat)
+                    notes.sort(Comparator.comparingInt(Note::getId));
+                    for (Note note : notes) {
+                        System.out.println(note.getFormattedDate() + " | " + note.getContent());
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            // Catch any other unexpected errors
+            System.out.println("invalid input");
+            // e.printStackTrace(); // Optional: for debugging
+        } finally {
+             if (scanner != null) {
+                  scanner.close();
+             }
+        }
+    }
+}
