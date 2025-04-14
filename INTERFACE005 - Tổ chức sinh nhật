@@ -1,0 +1,173 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+// Interface Identifiable
+interface Identifiable {
+    /**
+     * Gets the ID of the entity.
+     * @return The ID as a String.
+     */
+    String getId();
+}
+
+// Interface Birthable
+interface Birthable {
+    /**
+     * Gets the birth date of the entity.
+     * @return The birth date as a String in dd/MM/yyyy format.
+     */
+    String getBirthDate();
+}
+
+// Class Citizen implementing both interfaces
+class Citizen implements Identifiable, Birthable {
+    private String name;
+    private int age;
+    private String id;
+    private String birthDate;
+
+    /**
+     * Constructor for Citizen.
+     * @param name The citizen's name.
+     * @param age The citizen's age.
+     * @param id The citizen's ID.
+     * @param birthDate The citizen's birth date (dd/MM/yyyy).
+     */
+    public Citizen(String name, int age, String id, String birthDate) {
+        this.name = name;
+        this.age = age;
+        this.id = id;
+        this.birthDate = birthDate;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    // Setters (optional based on problem description, not strictly needed here)
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
+    }
+}
+
+// Class Pet implementing Birthable interface
+class Pet implements Birthable {
+    private String name;
+    private String birthDate;
+
+    /**
+     * Constructor for Pet.
+     * @param name The pet's name.
+     * @param birthDate The pet's birth date (dd/MM/yyyy).
+     */
+    public Pet(String name, String birthDate) {
+        this.name = name;
+        this.birthDate = birthDate;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+     // Setters (optional based on problem description, not strictly needed here)
+     public void setName(String name) {
+         this.name = name;
+     }
+
+     public void setBirthDate(String birthDate) {
+         this.birthDate = birthDate;
+     }
+}
+
+// Main class to handle input and output
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases
+        int t = Integer.parseInt(scanner.nextLine());
+
+        while (t-- > 0) {
+            // List to store all entities that have a birth date
+            List<Birthable> birthables = new ArrayList<>();
+            String line;
+
+            // Read input until "End" command
+            while (!(line = scanner.nextLine()).equals("End")) {
+                String[] parts = line.split(" ");
+                String type = parts[0];
+                String name = parts[1];
+
+                if (type.equals("Citizen")) {
+                    int age = Integer.parseInt(parts[2]);
+                    String id = parts[3];
+                    String birthDate = parts[4];
+                    // Create Citizen and add to the list
+                    birthables.add(new Citizen(name, age, id, birthDate));
+                } else if (type.equals("Pet")) {
+                    String birthDate = parts[2];
+                     // Create Pet and add to the list
+                    birthables.add(new Pet(name, birthDate));
+                }
+                // Potentially handle other types here if needed
+            }
+
+            // Read the target year
+            String targetYear = scanner.nextLine();
+            boolean found = false; // Flag to check if any birth date was printed
+
+            // Iterate through the list and check birth dates
+            for (Birthable entity : birthables) {
+                String birthDate = entity.getBirthDate();
+                // Extract the year from the birth date string (format dd/MM/yyyy)
+                String year = birthDate.substring(birthDate.lastIndexOf('/') + 1);
+
+                // If the year matches the target year, print the birth date
+                if (year.equals(targetYear)) {
+                    System.out.println(birthDate);
+                    found = true;
+                }
+            }
+
+            // If no matching birth dates were found for a test case (and the problem required
+            // a specific output for empty results), we would handle it here.
+            // Based on the examples, printing nothing is the correct behavior for empty results.
+        }
+
+        scanner.close();
+    }
+}
