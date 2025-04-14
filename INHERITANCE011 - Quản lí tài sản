@@ -1,0 +1,329 @@
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Scanner;
+import java.text.DecimalFormat; // For formatting output
+
+/**
+ * Base class for all assets.
+ * Represents common properties and defines the depreciation calculation contract.
+ */
+abstract class Asset {
+    protected String name;
+    protected double value;
+    protected Date acquisitionDate; // Date is not used in input/output based on example,
+                                    // but kept as per description. Initialized to current date.
+
+    /**
+     * Constructor for Asset.
+     *
+     * @param name  The name of the asset.
+     * @param value The monetary value of the asset.
+     */
+    public Asset(String name, double value) {
+        this.name = name;
+        this.value = value;
+        this.acquisitionDate = new Date(); // Initialize with current date
+    }
+
+    // --- Getters ---
+    public String getName() {
+        return name;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public Date getAcquisitionDate() {
+        return acquisitionDate;
+    }
+
+    // --- Setters (Optional, not strictly needed for this problem) ---
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    public void setAcquisitionDate(Date acquisitionDate) {
+        this.acquisitionDate = acquisitionDate;
+    }
+
+    /**
+     * Abstract method to calculate the depreciation of the asset.
+     * Must be implemented by subclasses.
+     *
+     * @return The calculated depreciation amount.
+     */
+    public abstract double getDepreciation();
+
+    /**
+     * Provides a basic string representation for display.
+     * Subclasses might override for more specific info if needed.
+     */
+    @Override
+    public String toString() {
+        DecimalFormat df = new DecimalFormat("#0.0"); // Format to one decimal place
+        return "Asset Name: " + name + "\n" +
+               "Asset Value: " + df.format(value) + "\n" +
+               "Depreciation: " + df.format(getDepreciation());
+    }
+}
+
+/**
+ * Represents a Fixed Asset, inheriting from Asset.
+ */
+class FixedAsset extends Asset {
+    private int usefulLife; // Time in years
+
+    /**
+     * Constructor for FixedAsset.
+     *
+     * @param name       The name of the fixed asset.
+     * @param value      The monetary value of the fixed asset.
+     * @param usefulLife The useful life of the asset in years.
+     */
+    public FixedAsset(String name, double value, int usefulLife) {
+        super(name, value); // Call the base class constructor
+        this.usefulLife = usefulLife;
+    }
+
+    // --- Getter ---
+    public int getUsefulLife() {
+        return usefulLife;
+    }
+
+    // --- Setter (Optional) ---
+    public void setUsefulLife(int usefulLife) {
+        this.usefulLife = usefulLife;
+    }
+
+    /**
+     * Calculates depreciation for FixedAsset based on useful life.
+     * Handles potential division by zero.
+     *
+     * @return Depreciation amount (value / usefulLife).
+     */
+    @Override
+    public double getDepreciation() {
+        if (usefulLife <= 0) {
+            return 0; // Or throw an exception, depending on requirements
+        }
+        return value / usefulLife;
+    }
+}
+
+/**
+ * Represents a Current Asset, inheriting from Asset.
+ */
+class CurrentAsset extends Asset {
+    private double liquidationValue;
+
+    /**
+     * Constructor for CurrentAsset.
+     *
+     * @param name             The name of the current asset.
+     * @param value            The monetary value of the current asset.
+     * @param liquidationValue The value if the asset were liquidated.
+     */
+    public CurrentAsset(String name, double value, double liquidationValue) {
+        super(name, value); // Call the base class constructor
+        this.liquidationValue = liquidationValue;
+    }
+
+    // --- Getter ---
+    public double getLiquidationValue() {
+        return liquidationValue;
+    }
+
+    // --- Setter (Optional) ---
+    public void setLiquidationValue(double liquidationValue) {
+        this.liquidationValue = liquidationValue;
+    }
+
+    /**
+     * Calculates depreciation for CurrentAsset as a fixed percentage (10%) of its value.
+     *
+     * @return Depreciation amount (value * 0.1).
+     */
+    @Override
+    public double getDepreciation() {
+        return value * 0.1; // 10% depreciation rate
+    }
+}
+
+/**
+ * Represents an Intangible Asset, inheriting from Asset.
+ */
+class IntangibleAsset extends Asset {
+    private int amortizationPeriod; // Time in years
+
+    /**
+     * Constructor for IntangibleAsset.
+     *
+     * @param name               The name of the intangible asset.
+     * @param value              The monetary value of the intangible asset.
+     * @param amortizationPeriod The period over which the asset is amortized (in years).
+     */
+    public IntangibleAsset(String name, double value, int amortizationPeriod) {
+        super(name, value); // Call the base class constructor
+        this.amortizationPeriod = amortizationPeriod;
+    }
+
+    // --- Getter ---
+    public int getAmortizationPeriod() {
+        return amortizationPeriod;
+    }
+
+    // --- Setter (Optional) ---
+    public void setAmortizationPeriod(int amortizationPeriod) {
+        this.amortizationPeriod = amortizationPeriod;
+    }
+
+    /**
+     * Calculates depreciation (amortization) for IntangibleAsset using linear amortization.
+     * Handles potential division by zero.
+     *
+     * @return Depreciation amount (value / amortizationPeriod).
+     */
+    @Override
+    public double getDepreciation() {
+        if (amortizationPeriod <= 0) {
+            return 0; // Or throw an exception
+        }
+        return value / amortizationPeriod;
+    }
+}
+
+/**
+ * Manages a collection of Assets.
+ */
+class AssetManager {
+    private List<Asset> assets;
+
+    /**
+     * Constructor for AssetManager. Initializes an empty list of assets.
+     */
+    public AssetManager() {
+        this.assets = new ArrayList<>();
+    }
+
+    /**
+     * Adds an asset to the manager's list.
+     *
+     * @param asset The Asset object to add.
+     */
+    public void addAsset(Asset asset) {
+        if (asset != null) {
+            this.assets.add(asset);
+        }
+    }
+
+    /**
+     * Calculates the total value of all assets managed.
+     *
+     * @return The sum of the values of all assets.
+     */
+    public double getTotalValue() {
+        double total = 0;
+        for (Asset asset : assets) {
+            total += asset.getValue();
+        }
+        return total;
+    }
+
+    /**
+     * Calculates the total depreciation of all assets managed.
+     * Uses polymorphism to call the correct getDepreciation method for each asset type.
+     *
+     * @return The sum of the depreciation of all assets.
+     */
+    public double getTotalDepreciation() {
+        double totalDepreciation = 0;
+        for (Asset asset : assets) {
+            totalDepreciation += asset.getDepreciation();
+        }
+        return totalDepreciation;
+    }
+
+    /**
+     * Returns the list of managed assets.
+     *
+     * @return The list of Asset objects.
+     */
+    public List<Asset> getAssets() {
+        return assets; // Returns a reference to the internal list
+    }
+}
+
+/**
+ * Main class to run the Asset Management simulation.
+ */
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        AssetManager manager = new AssetManager();
+        DecimalFormat df = new DecimalFormat("#0.0"); // Format to one decimal place
+
+        // Read the number of assets
+        int n = Integer.parseInt(scanner.nextLine());
+
+        // Read asset details
+        for (int i = 0; i < n; i++) {
+            String line = scanner.nextLine();
+            String[] parts = line.split(" ");
+
+            String assetType = parts[0];
+            String name = parts[1];
+            double value = Double.parseDouble(parts[2]);
+
+            Asset asset = null;
+            switch (assetType) {
+                case "FixedAsset":
+                    int usefulLife = Integer.parseInt(parts[3]);
+                    asset = new FixedAsset(name, value, usefulLife);
+                    break;
+                case "CurrentAsset":
+                    // Assuming the 4th part is liquidationValue for CurrentAsset
+                    // based on standard input patterns, even if description was slightly ambiguous.
+                    // If the 4th part ISN'T liquidationValue for CurrentAsset per input spec, adjust this.
+                     double liquidationValue = Double.parseDouble(parts[3]); // Check input spec carefully
+                     asset = new CurrentAsset(name, value, liquidationValue);
+                    break;
+                case "IntangibleAsset":
+                    int amortizationPeriod = Integer.parseInt(parts[3]);
+                    asset = new IntangibleAsset(name, value, amortizationPeriod);
+                    break;
+                default:
+                    System.err.println("Unknown asset type: " + assetType);
+                    // Handle error or skip
+                    break;
+            }
+            manager.addAsset(asset);
+        }
+
+        // (1): Display the added assets
+        List<Asset> allAssets = manager.getAssets();
+        for (int i = 0; i < allAssets.size(); i++) {
+            System.out.println(allAssets.get(i).toString()); // Uses overridden toString
+            if (i < allAssets.size() - 1) { // Print separator if not the last item
+                System.out.println("---------------------------");
+            }
+        }
+         // Print separator before totals only if there were assets displayed
+        if (!allAssets.isEmpty()) {
+             System.out.println("---------------------------");
+        }
+
+
+        // (2): Calculate and display total value and total depreciation
+        System.out.println("Total Value of Assets: " + df.format(manager.getTotalValue()));
+        System.out.println("Total Depreciation of Assets: " + df.format(manager.getTotalDepreciation()));
+
+        scanner.close();
+    }
+}
