@@ -1,0 +1,72 @@
+import java.util.Scanner;
+
+// Lớp abstract Shape
+abstract class Shape {
+    // Phương thức abstract tính diện tích của hình
+    public abstract double calculateArea();
+
+    // Phương thức hiển thị thông tin về diện tích
+    public void displayInfo() {
+        System.out.printf("Shape:%s|Area:%.2f\n", this.getClass().getSimpleName(), calculateArea());
+    }
+}
+
+// Lớp Circle kế thừa từ Shape
+class Circle extends Shape {
+    private double radius;
+
+    // Constructor Circle nhận bán kính
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    // Tính diện tích của hình tròn
+    @Override
+    public double calculateArea() {
+        return Math.PI * radius * radius;
+    }
+}
+
+// Lớp Rectangle kế thừa từ Shape
+class Rectangle extends Shape {
+    private double width;
+    private double length;
+
+    // Constructor Rectangle nhận chiều rộng và chiều dài
+    public Rectangle(double width, double length) {
+        this.width = width;
+        this.length = length;
+    }
+
+    // Tính diện tích của hình chữ nhật
+    @Override
+    public double calculateArea() {
+        return width * length;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();  // Đọc số lượng test case
+        scanner.nextLine();  // Đọc ký tự newline còn lại
+
+        // Xử lý các test case
+        for (int i = 0; i < n; i++) {
+            String shapeType = scanner.next();  // Loại hình (Circle hoặc Rectangle)
+
+            if (shapeType.equals("Rectangle")) {
+                double width = scanner.nextDouble();
+                double length = scanner.nextDouble();
+                Rectangle rectangle = new Rectangle(width, length);
+                rectangle.displayInfo();  // Hiển thị thông tin diện tích của hình chữ nhật
+            } else if (shapeType.equals("Circle")) {
+                double radius = scanner.nextDouble();
+                Circle circle = new Circle(radius);
+                circle.displayInfo();  // Hiển thị thông tin diện tích của hình tròn
+            }
+        }
+
+        scanner.close();
+    }
+}
