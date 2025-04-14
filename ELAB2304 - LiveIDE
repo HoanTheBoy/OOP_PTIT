@@ -1,0 +1,45 @@
+import java.util.*;
+import java.lang.*;
+
+// Interface definition
+interface A {
+    void m(); // Method signature for m
+
+    void n(String msg); // Method signature for n
+}
+
+// Class C implementing interface A
+class C implements A {
+    // Implementation of method m from interface A
+    @Override // Good practice to add Override annotation
+    public void m() {
+        System.out.println("Method m() of C");
+    }
+
+    // Implementation of method n from interface A
+    // Must be public because interface methods are implicitly public
+    @Override // Good practice to add Override annotation
+    public void n(String msg) {
+        System.out.println("OOP23 " + msg); // Prints prefix and the passed message
+    }
+}
+
+// Class D inheriting from C
+class D extends C { // Class definition syntax corrected
+    boolean d = true; // Field declaration syntax corrected
+} // Closing brace for class D added
+
+// Main class containing the entry point
+public class Main {
+    // Correct main method signature (public static void main)
+    public static void main(String[] args) {
+        D d = new D(); // Create an instance of D, variable name is 'd'
+
+        // Call methods on the 'd' object
+        d.m(); // Calls inherited method m()
+        d.n("OOP23"); // Calls inherited method n() with argument "OOP23"
+
+        // Access the field 'd' of the 'd' object
+        System.out.println(d.d);
+    } // Closing brace for main method
+} // Closing brace for Main class
