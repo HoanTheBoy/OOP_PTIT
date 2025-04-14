@@ -1,0 +1,19 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Đọc số lượng chuỗi cần nhập
+        int n = scanner.nextInt();
+        scanner.nextLine();  // Đọc ký tự newline còn lại
+        
+        // Đọc và in từng chuỗi
+        for (int i = 0; i < n; i++) {
+            String input = scanner.nextLine();  // Đọc chuỗi từ người dùng
+            System.out.println(input);  // In ra chuỗi
+        }
+        
+        scanner.close();  // Đóng scanner
+    }
+}
