@@ -1,0 +1,117 @@
+import java.util.Objects;
+
+/**
+ * Represents a simple date with day, month, and year components.
+ */
+class SimpleDate {
+    private int day;
+    private int month;
+    private int year;
+
+    /**
+     * Constructs a SimpleDate object.
+     *
+     * @param day   The day of the month.
+     * @param month The month of the year.
+     * @param year  The year.
+     */
+    public SimpleDate(int day, int month, int year) {
+        this.day = day;
+        this.month = month;
+        this.year = year;
+    }
+
+    // Getters (optional, but good practice)
+    public int getDay() {
+        return day;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    /**
+     * Compares this SimpleDate to another object for equality.
+     * Two SimpleDate objects are considered equal if their day, month,
+     * and year are the same.
+     *
+     * @param obj The object to compare with.
+     * @return true if the objects are equal, false otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        // 1. Check if the reference is the same (identity check)
+        if (this == obj) {
+            return true;
+        }
+
+        // 2. Check if the other object is null
+        if (obj == null) {
+            return false;
+        }
+
+        // 3. Check if the other object is of the same class
+        if (getClass() != obj.getClass()) {
+        // Alternatively, you could use: if (!(obj instanceof SimpleDate))
+        // Using getClass() is generally preferred for strict equality.
+            return false;
+        }
+
+        // 4. Cast the object to SimpleDate type
+        SimpleDate other = (SimpleDate) obj;
+
+        // 5. Compare the attributes (day, month, year)
+        return this.day == other.day &&
+               this.month == other.month &&
+               this.year == other.year;
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     * This method is overridden to be consistent with the equals method.
+     * Objects that are equal according to the equals method must have the same hash code.
+     *
+     * @return a hash code value for this object.
+     */
+    @Override
+    public int hashCode() {
+        // Use Objects.hash for a convenient way to combine hash codes of fields
+        return Objects.hash(day, month, year);
+    }
+
+     /**
+      * Returns a string representation of the SimpleDate object.
+      * (Optional, but helpful for debugging)
+      *
+      * @return A string in the format "day/month/year".
+      */
+     @Override
+     public String toString() {
+         return day + "/" + month + "/" + year;
+     }
+}
+
+/**
+ * Main class to demonstrate the usage of SimpleDate and its equals method.
+ */
+public class Main {
+
+    public static void main(String[] args) {
+        // The reference date
+        SimpleDate date1 = new SimpleDate(1, 2, 2000);
+
+        // Values to compare against
+        String text = "heh";
+        SimpleDate date2 = new SimpleDate(5, 2, 2012);
+        SimpleDate date3 = new SimpleDate(1, 2, 2000); // Same date as date1
+
+        // Perform comparisons using the equals method and print results
+        System.out.println(date1.equals(text));   // date1 vs String "heh"
+        System.out.println(date1.equals(date2));   // date1 vs date2 (different date)
+        System.out.println(date1.equals(date3));   // date1 vs date3 (same date)
+    }
+}
