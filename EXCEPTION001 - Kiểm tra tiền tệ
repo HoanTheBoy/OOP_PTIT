@@ -1,0 +1,69 @@
+import java.util.Scanner;
+
+class Amount {
+    private String currency;
+    private int amount;
+
+    // Constructor để khởi tạo giá trị cho currency và amount
+    public Amount(String currency, int amount) {
+        this.currency = currency;
+        this.amount = amount;
+    }
+
+    // Getter cho currency
+    public String getCurrency() {
+        return currency;
+    }
+
+    // Getter cho amount
+    public int getAmount() {
+        return amount;
+    }
+
+    // Phương thức add để cộng số tiền
+    public void add(Amount amountObj) throws Exception {
+        // Kiểm tra nếu currency không giống nhau
+        if (!this.currency.equals(amountObj.getCurrency())) {
+            throw new Exception("Currency doesn't match");
+        }
+        // Nếu currency giống nhau, cộng số tiền
+        this.amount += amountObj.getAmount();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Đọc số test case
+        int testCases = scanner.nextInt();
+
+        // Xử lý từng test case
+        for (int i = 0; i < testCases; i++) {
+            // Đọc dữ liệu cho amount1
+            String currency1 = scanner.next();
+            int amount1 = scanner.nextInt();
+
+            // Đọc dữ liệu cho amount2
+            String currency2 = scanner.next();
+            int amount2 = scanner.nextInt();
+
+            try {
+                // Tạo hai đối tượng Amount
+                Amount amountObj1 = new Amount(currency1, amount1);
+                Amount amountObj2 = new Amount(currency2, amount2);
+
+                // Thực hiện cộng số tiền
+                amountObj1.add(amountObj2);
+
+                // In ra tổng số tiền
+                System.out.println(amountObj1.getAmount());
+            } catch (Exception e) {
+                // In ra thông báo ngoại lệ nếu currency không khớp
+                System.out.println(e.getMessage());
+            }
+        }
+
+        scanner.close();
+    }
+}
