@@ -1,0 +1,110 @@
+import java.util.Scanner;
+import java.util.ArrayList; // Optional: if we wanted to store students
+
+// --- Định nghĩa lớp Student ---
+class Student {
+    // Thuộc tính private để đảm bảo tính đóng gói
+    private String name;
+    private int age;
+
+    // Biến static để đếm tổng số đối tượng Student đã được tạo
+    private static int studentCount = 0;
+
+    // Constructor: Hàm khởi tạo đối tượng Student
+    public Student(String name, int age) {
+        this.name = name; // Gán tên từ tham số vào thuộc tính name của đối tượng
+        this.age = age;   // Gán tuổi từ tham số vào thuộc tính age của đối tượng
+        studentCount++;   // Tăng biến đếm static mỗi khi một đối tượng mới được tạo
+    }
+
+    // Getter cho name
+    public String getName() {
+        return name;
+    }
+
+    // Setter cho name
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Getter cho age
+    public int getAge() {
+        return age;
+    }
+
+    // Setter cho age
+    public void setAge(int age) {
+        // Có thể thêm kiểm tra tuổi hợp lệ ở đây nếu cần (ví dụ: age >= 0)
+        this.age = age;
+    }
+
+    // Phương thức display() theo yêu cầu
+    public void display() {
+        // Chỉ in tên nếu tuổi >= 18
+        if (this.age >= 18) {
+            System.out.println(this.name);
+        }
+    }
+
+    // Phương thức static để lấy tổng số sinh viên đã tạo
+    public static int getStudentCount() {
+        return studentCount;
+    }
+
+    // (Tùy chọn) Override toString() để biểu diễn đối tượng Student dưới dạng chuỗi
+    @Override
+    public String toString() {
+        return "Student [name=" + name + ", age=" + age + "]";
+    }
+}
+
+// --- Lớp Main để chạy chương trình ---
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Optional: List để lưu các đối tượng sinh viên nếu cần xử lý sau này
+        // ArrayList<Student> studentList = new ArrayList<>();
+
+        // Vòng lặp để đọc dữ liệu vào cho đến khi hết input
+        // Mỗi cặp dòng là tên và tuổi của một sinh viên
+        while (scanner.hasNextLine()) {
+            // Đọc tên sinh viên
+            String name = scanner.nextLine();
+            // Kiểm tra xem còn dòng tiếp theo cho tuổi không
+            if (!scanner.hasNextLine()) {
+                // Nếu không còn dòng tuổi, có thể là input kết thúc bất thường
+                // hoặc dòng tên là dòng cuối cùng không mong muốn.
+                // Trong trường hợp này, ta dừng đọc.
+                break;
+            }
+            // Đọc dòng chứa tuổi (dưới dạng chuỗi)
+            String ageString = scanner.nextLine();
+
+            try {
+                // Chuyển đổi chuỗi tuổi thành số nguyên
+                int age = Integer.parseInt(ageString);
+
+                // Tạo đối tượng Student mới
+                Student student = new Student(name, age);
+                // Optional: Thêm vào danh sách
+                // studentList.add(student);
+
+                // Gọi phương thức display() cho đối tượng vừa tạo
+                student.display();
+
+            } catch (NumberFormatException e) {
+                // Xử lý trường hợp dòng tuổi không phải là số nguyên hợp lệ
+                // Có thể bỏ qua dòng lỗi hoặc in thông báo
+                 // System.err.println("Lỗi: Tuổi không hợp lệ cho sinh viên '" + name + "'. Bỏ qua.");
+                 // Trong bài thi, thường bỏ qua dòng lỗi và tiếp tục
+                 continue;
+            }
+        }
+
+        // Sau khi đọc hết dữ liệu, in ra tổng số đối tượng Student đã được khởi tạo
+        System.out.println(Student.getStudentCount());
+
+        // Đóng Scanner để giải phóng tài nguyên
+        scanner.close();
+    }
+}
