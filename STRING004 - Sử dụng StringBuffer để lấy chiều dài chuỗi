@@ -1,0 +1,30 @@
+import java.util.Scanner;
+
+public class Main { // Rename to STRING004 if required by the platform
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases
+        int numberOfTestCases = scanner.nextInt();
+        scanner.nextLine(); // Consume the newline character left by nextInt()
+
+        // Process each test case
+        for (int i = 0; i < numberOfTestCases; i++) {
+            // Read the input string for the current test case
+            String s = scanner.nextLine();
+
+            // Create a StringBuffer object from the input string
+            StringBuffer stringBuffer = new StringBuffer(s);
+
+            // Get the length using the StringBuffer's length() method
+            int length = stringBuffer.length();
+
+            // Print the length for this test case
+            System.out.println(length);
+        }
+
+        // Close the scanner
+        scanner.close();
+    }
+}
