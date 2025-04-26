@@ -1,0 +1,86 @@
+// 1. Define the interface
+interface Packable {
+    double weight();
+}
+
+// 2. Implement the Book class
+class Book implements Packable {
+    private String author;
+    private String name;
+    private double weight; // Weight in kg
+
+    // Constructor for Book
+    public Book(String author, String name, double weight) {
+        this.author = author;
+        this.name = name;
+        this.weight = weight;
+    }
+
+    // Implement the weight() method from Packable interface
+    @Override
+    public double weight() {
+        return this.weight;
+    }
+
+    // Override toString() for the desired output format
+    @Override
+    public String toString() {
+        return this.author + ": " + this.name;
+    }
+}
+
+// 3. Implement the CD class
+class CD implements Packable {
+    private String artist;
+    private String name;
+    private int publicationYear;
+    private static final double CD_WEIGHT = 0.1; // Constant weight for all CDs in kg
+
+    // Constructor for CD
+    public CD(String artist, String name, int publicationYear) {
+        this.artist = artist;
+        this.name = name;
+        this.publicationYear = publicationYear;
+    }
+
+    // Implement the weight() method from Packable interface
+    @Override
+    public double weight() {
+        // All CDs have a fixed weight of 0.1 kg
+        return CD_WEIGHT;
+    }
+
+    // Override toString() for the desired output format
+    @Override
+    public String toString() {
+        return this.artist + ": " + this.name + " (" + this.publicationYear + ")";
+    }
+}
+
+// 4. Main class to create objects and print output
+public class Main { // Rename to INTERFACE001 if required by the platform
+
+    public static void main(String[] args) {
+        // Create Book objects using the provided data
+        Book book1 = new Book("Fyodor Dostoevsky", "Crime and Punishment", 2.0);
+        Book book2 = new Book("Robert Martin", "Clean Code", 1.0);
+        Book book3 = new Book("Kent Beck", "Test Driven Development", 0.5);
+
+        // Create CD objects using the provided data
+        CD cd1 = new CD("Pink Floyd", "Dark Side of the Moon", 1973);
+        CD cd2 = new CD("Wigwam", "Nuclear Nightclub", 1975);
+        CD cd3 = new CD("Rendezvous Park", "Closer to Being Here", 2012);
+
+        // Print the objects. This automatically calls their toString() methods.
+        System.out.println(book1);
+        System.out.println(book2);
+        System.out.println(book3);
+        System.out.println(cd1);
+        System.out.println(cd2);
+        System.out.println(cd3);
+
+        // Optional: Demonstrate the weight() method (not required for output)
+        // System.out.println("Weight of " + book1.toString() + ": " + book1.weight());
+        // System.out.println("Weight of " + cd1.toString() + ": " + cd1.weight());
+    }
+}
