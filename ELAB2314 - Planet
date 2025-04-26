@@ -1,0 +1,135 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.math.RoundingMode; // For explicit rounding control
+
+// --- Định nghĩa lớp Planet ---
+class Planet {
+    // Hằng số cần thiết
+    // Không cần G vì nó sẽ triệt tiêu khi tính tỉ lệ trọng lực
+    // private static final double G = 6.67430e-11; // Hằng số hấp dẫn (N m^2 / kg^2)
+
+    // Thông tin Trái Đất để so sánh
+    private static final double EARTH_MASS = 5.976e+24; // Khối lượng Trái Đất (kg)
+    private static final double EARTH_RADIUS = 6.37814e6; // Bán kính Trái Đất (m)
+
+    // Thuộc tính của hành tinh
+    private String name;
+    private double mass;   // Khối lượng (kg)
+    private double radius; // Bán kính (m)
+
+    // Constructor
+    public Planet(String name, double mass, double radius) {
+        this.name = name;
+        this.mass = mass;
+        this.radius = radius;
+    }
+
+    // Getters (không bắt buộc cho bài này nhưng là good practice)
+    public String getName() {
+        return name;
+    }
+
+    public double getMass() {
+        return mass;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    /* --- Cách 1: Tính trọng lực bề mặt tường minh (ít tối ưu hơn) ---
+    // Phương thức tính trọng lực bề mặt (m/s^2)
+    public double calculateSurfaceGravity() {
+        if (this.radius == 0) { // Tránh chia cho 0
+            return 0.0;
+        }
+        return (G * this.mass) / (this.radius * this.radius);
+        // Hoặc Math.pow(this.radius, 2)
+    }
+
+    // Phương thức tính khối lượng trên hành tinh này dựa trên khối lượng Trái Đất
+    public double calculateWeightOnPlanet(double earthWeight) {
+        double earthSurfaceGravity = (G * EARTH_MASS) / (EARTH_RADIUS * EARTH_RADIUS);
+        if (earthSurfaceGravity == 0) { // Tránh chia cho 0
+            return 0.0; // Hoặc ném lỗi
+        }
+        double planetSurfaceGravity = this.calculateSurfaceGravity();
+        // Tỉ lệ trọng lực
+        double gravityRatio = planetSurfaceGravity / earthSurfaceGravity;
+        return earthWeight * gravityRatio;
+    }
+    */
+
+    // --- Cách 2: Tính trực tiếp tỉ lệ khối lượng (tối ưu hơn vì G triệt tiêu) ---
+    /**
+     * Tính khối lượng của một vật trên hành tinh này,
+     * dựa trên khối lượng của vật đó trên Trái Đất.
+     * Công thức tối ưu: Weight_Planet = Weight_Earth * (M_planet * R_earth^2) / (M_earth * R_planet^2)
+     *
+     * @param earthWeight Khối lượng của vật trên Trái Đất.
+     * @return Khối lượng của vật trên hành tinh này.
+     */
+    public double calculateWeightOnPlanet(double earthWeight) {
+        // Kiểm tra mẫu số để tránh chia cho 0
+        if (EARTH_MASS == 0 || this.radius == 0) {
+            return 0.0; // Hoặc xử lý lỗi phù hợp
+        }
+
+        // Tử số: (Khối lượng hành tinh * Bình phương bán kính Trái Đất)
+        double numerator = this.mass * Math.pow(EARTH_RADIUS, 2);
+
+        // Mẫu số: (Khối lượng Trái Đất * Bình phương bán kính hành tinh)
+        double denominator = EARTH_MASS * Math.pow(this.radius, 2);
+
+        if (denominator == 0) {
+             return 0.0; // Tránh chia cho 0 nếu bán kính hành tinh là 0
+        }
+
+        // Tỉ lệ khối lượng (tương đương tỉ lệ trọng lực bề mặt)
+        double weightRatio = numerator / denominator;
+
+        // Khối lượng trên hành tinh = Khối lượng Trái Đất * tỉ lệ
+        return earthWeight * weightRatio;
+    }
+
+} // Kết thúc lớp Planet
+
+// --- Lớp Main ---
+public class Main {
+
+    public static void main(String[] args) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        // Định dạng số thập phân với 2 chữ số sau dấu phẩy
+        DecimalFormat df = new DecimalFormat("0.00");
+        // Đặt chế độ làm tròn HALF_UP (làm tròn lên từ .5)
+        df.setRoundingMode(RoundingMode.HALF_UP);
+
+        try {
+            // 1. Đọc dữ liệu vào
+            String planetName = reader.readLine();
+            // Đọc khối lượng và bán kính dưới dạng chuỗi, sau đó chuyển đổi
+            double planetMass = Double.parseDouble(reader.readLine());
+            double planetRadius = Double.parseDouble(reader.readLine());
+            double objectEarthWeight = Double.parseDouble(reader.readLine());
+
+            // 2. Tạo đối tượng Planet
+            Planet targetPlanet = new Planet(planetName, planetMass, planetRadius);
+
+            // 3. Tính toán khối lượng trên hành tinh mục tiêu
+            double weightOnPlanet = targetPlanet.calculateWeightOnPlanet(objectEarthWeight);
+
+            // 4. Định dạng và in kết quả
+            String formattedWeight = df.format(weightOnPlanet);
+            System.out.printf("Your weight on %s is %s%n", targetPlanet.getName(), formattedWeight);
+
+        } catch (IOException e) {
+            System.err.println("Lỗi khi đọc dữ liệu đầu vào: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.err.println("Lỗi: Dữ liệu đầu vào không phải là số hợp lệ. " + e.getMessage());
+        } catch (Exception e) { // Bắt các lỗi khác nếu có
+            System.err.println("Đã xảy ra lỗi không mong muốn: " + e.getMessage());
+        }
+    }
+}
