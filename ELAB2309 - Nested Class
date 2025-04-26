@@ -1,0 +1,88 @@
+import java.util.Scanner; // Import Scanner để đọc dữ liệu
+
+public class Main {
+    // SỬA LỖI: Thêm 'static' vào khai báo lớp Final để cho phép phương thức tĩnh bên trong
+    static class Final {
+        // Phương thức nhận boolean[], String[], Integer
+        static void f(boolean[] a, String[] b, Integer c) {
+            System.out.println(b[0]); // In phần tử đầu của mảng String
+            a[0] = true;              // Thay đổi phần tử đầu của mảng boolean GỐC (vì mảng là tham chiếu)
+            // !!! LƯU Ý QUAN TRỌNG:
+            // Integer là lớp immutable (bất biến). Phép cộng này tạo ra một đối tượng Integer MỚI.
+            // Biến 'c' cục bộ trong phương thức này sẽ tham chiếu đến đối tượng mới (giá trị + 1).
+            // Biến 'e' gốc trong hàm main() KHÔNG bị thay đổi.
+            c = c + 1;
+            System.out.println(a[0]); // In giá trị đã thay đổi của mảng boolean
+            System.out.println(c);    // In giá trị Integer cục bộ đã tăng
+        }
+
+        // Phương thức nhận int, char, StringBuffer
+        static void f(int d, char e, StringBuffer f) {
+            System.out.println(d);   // In giá trị int
+            // Thay đổi giá trị của biến 'd' CỤC BỘ trong phương thức này.
+            // Biến 'a' gốc trong hàm main() KHÔNG bị thay đổi (vì int là kiểu nguyên thủy, truyền giá trị).
+            d = d + (int)e;
+            System.out.println(f);   // In đối tượng StringBuffer GỐC (vì StringBuffer là tham chiếu và có thể thay đổi)
+        }
+
+        // Phương thức nhận double, byte, Float
+        static void f(double g, byte i, Float h){
+            // Thay đổi giá trị của biến 'g' CỤC BỘ trong phương thức này.
+            // Biến 'b' gốc trong hàm main() KHÔNG bị thay đổi (vì double là kiểu nguyên thủy, truyền giá trị).
+            g = g + h; // Tự động unboxing h (Float -> float) để cộng
+            // 'i' là byte, 'g' là double (đã thay đổi cục bộ). Kết quả là double.
+            System.out.println(i+g);
+        }
+    }
+
+    public static void main(String[] args) {
+        // Khai báo và khởi tạo biến như trong đề bài
+        int a = 10;
+        double b = 3.14;
+        char c = 'c';
+        String[] d = {"OOP", "2023"};
+        Integer e = 1; // Autoboxing: int 1 -> Integer(1)
+        boolean[] f = {false, true};
+        StringBuffer g = new StringBuffer("Khoa Vien Thong");
+        byte h = 20;
+        Float i = 0.5f; // Autoboxing: float 0.5f -> Float(0.5f)
+
+        // (*) Bắt đầu phần code của bạn
+        Scanner scanner = new Scanner(System.in);
+        // Đọc cả dòng dữ liệu vào chứa tên các biến
+        String inputLine = scanner.nextLine();
+        // Tách dòng thành mảng các tên biến, dựa trên một hoặc nhiều khoảng trắng
+        String[] inputVarNames = inputLine.split("\\s+");
+
+        // Kiểm tra xem có đúng 3 tên biến được nhập vào không (vì các hàm f đều có 3 tham số)
+        if (inputVarNames.length == 3) {
+            // Xác định hàm f cần gọi dựa trên TỔ HỢP tên biến đầu vào
+
+            // Trường hợp 1: Tham số tương ứng với f(boolean[] a, String[] b, Integer c)
+            // Tên biến trong main tương ứng là: f, d, e
+            if (inputVarNames[0].equals("f") && inputVarNames[1].equals("d") && inputVarNames[2].equals("e")) {
+                Final.f(f, d, e); // Gọi hàm f với các biến thực tế f, d, e
+            }
+            // Trường hợp 2: Tham số tương ứng với f(int d, char e, StringBuffer f)
+            // Tên biến trong main tương ứng là: a, c, g
+            else if (inputVarNames[0].equals("a") && inputVarNames[1].equals("c") && inputVarNames[2].equals("g")) {
+                Final.f(a, c, g); // Gọi hàm f với các biến thực tế a, c, g
+            }
+            // Trường hợp 3: Tham số tương ứng với f(double g, byte i, Float h)
+            // Tên biến trong main tương ứng là: b, h, i
+            else if (inputVarNames[0].equals("b") && inputVarNames[1].equals("h") && inputVarNames[2].equals("i")) {
+                 Final.f(b, h, i); // Gọi hàm f với các biến thực tế b, h, i
+            }
+            // (Tùy chọn) Xử lý trường hợp tổ hợp tên biến không khớp với hàm nào
+            // else {
+            //     System.err.println("Tổ hợp tên biến không hợp lệ!");
+            // }
+        }
+        // (Tùy chọn) Xử lý trường hợp số lượng tên biến nhập vào không phải là 3
+        // else {
+        //     System.err.println("Cần nhập đúng 3 tên biến!");
+        // }
+
+        scanner.close(); // Đóng Scanner sau khi sử dụng xong
+    }
+}
