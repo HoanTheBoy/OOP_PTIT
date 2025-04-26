@@ -1,0 +1,83 @@
+import java.io.BufferedReader;       // Để đọc dữ liệu hiệu quả hơn
+import java.io.InputStreamReader;  // Để kết nối luồng byte (System.in) với luồng ký tự
+import java.io.IOException;        // Để xử lý ngoại lệ từ việc đọc/ghi
+import java.math.BigInteger;       // Vẫn cần thiết để xử lý số nguyên lớn
+
+public class Main {
+
+    public static void main(String[] args) throws IOException { // Thêm throws IOException vì readLine() có thể ném lỗi này
+        // Sử dụng BufferedReader để đọc nhanh hơn
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        // 1. Đọc số lượng testcase
+        // readLine() đọc cả dòng dưới dạng String, cần chuyển thành int
+        int t = Integer.parseInt(reader.readLine());
+
+        // StringBuilder để xây dựng chuỗi kết quả (có thể nhanh hơn một chút nếu có RẤT NHIỀU output)
+        // Mặc dù trong trường hợp này, System.out.println trực tiếp cũng thường đủ nhanh
+        // StringBuilder outputBuilder = new StringBuilder();
+
+        // 2. Lặp qua từng testcase
+        for (int i = 0; i < t; i++) {
+            // Đọc cả dòng biểu thức
+            String line = reader.readLine();
+
+            // Kiểm tra xem dòng có bị null không (đề phòng kết thúc input đột ngột)
+            if (line == null) {
+                break; // Kết thúc nếu không còn dòng nào để đọc
+            }
+
+            // Tách dòng thành các phần dựa trên khoảng trắng
+            // Lưu ý: parts[0] = số1, parts[1] = phép tính, parts[2] = số2
+            String[] parts = line.trim().split("\\s+"); // trim() loại bỏ khoảng trắng thừa ở đầu/cuối
+
+            // Kiểm tra xem có đủ 3 phần không
+            if (parts.length == 3) {
+                try {
+                    // Chuyển đổi chuỗi số thành đối tượng BigInteger
+                    BigInteger num1 = new BigInteger(parts[0]);
+                    String operator = parts[1];
+                    BigInteger num2 = new BigInteger(parts[2]);
+
+                    BigInteger result = null; // Biến để lưu kết quả
+
+                    // Thực hiện phép tính dựa trên toán tử
+                    switch (operator) {
+                        case "+":
+                            result = num1.add(num2); // Phép cộng
+                            break;
+                        case "-":
+                            result = num1.subtract(num2); // Phép trừ
+                            break;
+                        case "*":
+                            result = num1.multiply(num2); // Phép nhân
+                            break;
+                        default:
+                            // Nếu phép tính không hợp lệ, bỏ qua và không in gì cho test case này
+                            // Hoặc có thể in thông báo lỗi ra System.err nếu muốn
+                            // System.err.println("Phép tính không hợp lệ: " + operator);
+                            continue; // Chuyển sang test case tiếp theo
+                    }
+
+                    // In kết quả của test case hiện tại ngay lập tức
+                    System.out.println(result);
+                    // Hoặc thêm vào StringBuilder:
+                    // outputBuilder.append(result).append("\n");
+
+                } catch (NumberFormatException e) {
+                    // Xử lý nếu chuỗi không phải là số nguyên hợp lệ, bỏ qua test case lỗi
+                    // System.err.println("Định dạng số không hợp lệ trong dòng: " + line);
+                }
+            } else {
+                // Xử lý nếu định dạng dòng không đúng, bỏ qua test case lỗi
+                // System.err.println("Định dạng dòng không hợp lệ: " + line);
+            }
+        }
+
+        // Nếu dùng StringBuilder, in toàn bộ kết quả một lần ở cuối
+        // System.out.print(outputBuilder.toString());
+
+        // BufferedReader không cần đóng tường minh khi đọc từ System.in,
+        // nhưng nếu đọc từ file thì cần đóng trong khối finally.
+    }
+}
