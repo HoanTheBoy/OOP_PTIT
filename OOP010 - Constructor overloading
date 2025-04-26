@@ -1,0 +1,67 @@
+// Define the Product class
+class Product {
+    private String name;
+    private String location;
+    private int weight;
+
+    // Constructor 1: name only
+    // Default location: "shelf", Default weight: 1
+    public Product(String name) {
+        this.name = name;
+        this.location = "shelf"; // Default location
+        this.weight = 1;         // Default weight
+    }
+
+    // Constructor 2: name and location
+    // Default weight: 1
+    public Product(String name, String location) {
+        this.name = name;
+        this.location = location;
+        this.weight = 1;         // Default weight for this constructor
+    }
+
+    // Constructor 3: name and weight
+    // Default location: "shelf"
+    public Product(String name, int weight) {
+        this.name = name;
+        this.location = "shelf"; // Default location for this constructor
+        this.weight = weight;
+    }
+
+    // Override toString() method for custom output format
+    @Override
+    public String toString() {
+        // Format: "name (weightkg) can be found from the location"
+        return String.format("%s (%dkg) can be found from the %s",
+                             this.name, this.weight, this.location);
+    }
+
+    // Optional: Getters if needed elsewhere (not required by the problem)
+    public String getName() {
+        return name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+}
+
+// Main class to demonstrate the Product class
+public class Main { // Rename to OOP010 if required by the platform
+
+    public static void main(String[] args) {
+        // Create the three specified Product objects using the overloaded constructors
+        Product product1 = new Product("Tape measure");
+        Product product2 = new Product("Plaster", "home improvement section");
+        Product product3 = new Product("Tyre", 5);
+
+        // Print the objects, which automatically calls their toString() method
+        System.out.println(product1);
+        System.out.println(product2);
+        System.out.println(product3);
+    }
+}
