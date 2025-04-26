@@ -1,0 +1,42 @@
+import java.util.Scanner; // Import lớp Scanner để đọc dữ liệu đầu vào
+
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // 1. Đọc số lượng test case
+        int t = scanner.nextInt();
+        // Tiêu thụ ký tự xuống dòng còn lại sau khi đọc số nguyên t
+        // Quan trọng để lệnh nextLine() tiếp theo đọc đúng dòng
+        scanner.nextLine();
+
+        // 2. Lặp qua từng test case
+        for (int i = 0; i < t; i++) {
+            // 3. Đọc chuỗi đầu vào cho test case hiện tại
+            String inputString = scanner.nextLine();
+
+            // 4. Khởi tạo biến đếm số lượng chữ số
+            int digitCount = 0;
+
+            // 5. Duyệt qua từng ký tự trong chuỗi
+            for (int j = 0; j < inputString.length(); j++) {
+                // Lấy ký tự tại vị trí j
+                char currentChar = inputString.charAt(j);
+
+                // Kiểm tra xem ký tự đó có phải là chữ số hay không
+                // Character.isDigit() là phương thức tiện lợi để làm việc này
+                if (Character.isDigit(currentChar)) {
+                    // Nếu là chữ số, tăng biến đếm lên 1
+                    digitCount++;
+                }
+            }
+
+            // 6. In ra kết quả (số lượng chữ số) cho test case hiện tại
+            System.out.println(digitCount);
+        }
+
+        // 7. Đóng Scanner sau khi sử dụng xong
+        scanner.close();
+    }
+}
