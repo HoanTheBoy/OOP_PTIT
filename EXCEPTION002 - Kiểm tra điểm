@@ -1,0 +1,67 @@
+import java.util.Scanner;
+
+// 1. Define the custom exception class
+class NotJavaFileException extends Exception {
+    /**
+     * Constructor for NotJavaFileException.
+     * @param message The detail message explaining the reason for the exception.
+     */
+    public NotJavaFileException(String message) {
+        super(message);
+    }
+}
+
+// 2. Main class containing the logic
+public class Main { // Rename to EXCEPTION002 if required by the platform
+
+    /**
+     * Checks if a file name has the ".java" extension.
+     *
+     * @param fileName The name of the file to check.
+     * @return 1 if the file ends with ".java", 0 otherwise.
+     * @throws NotJavaFileException if the fileName is null or empty.
+     */
+    public static int checkFileExtension(String fileName) throws NotJavaFileException {
+        // Check for null or empty string - this is the exceptional case
+        if (fileName == null || fileName.isEmpty()) {
+            // Throw the custom exception
+            throw new NotJavaFileException("File name is null or empty.");
+        }
+
+        // Check if the valid (non-null, non-empty) filename ends with ".java"
+        if (fileName.endsWith(".java")) {
+            return 1; // Correct extension, 1 point
+        } else {
+            return 0; // Incorrect or no extension, 0 points
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases
+        int numberOfTestCases = scanner.nextInt();
+        scanner.nextLine(); // Consume the newline character left by nextInt()
+
+        // Process each test case
+        for (int i = 0; i < numberOfTestCases; i++) {
+            // Read the file name for the current test case
+            // Note: scanner.nextLine() correctly handles empty lines as empty strings ""
+            String fileName = scanner.nextLine();
+
+            try {
+                // Attempt to check the file extension and get the score
+                int score = checkFileExtension(fileName);
+                // If successful (no exception), print the score (0 or 1)
+                System.out.println(score);
+            } catch (NotJavaFileException e) {
+                // If NotJavaFileException is caught (meaning fileName was null or empty)
+                // Print the specific error message required by the problem
+                System.out.println("Not java file exception.Mark is -1");
+            }
+        }
+
+        // Close the scanner
+        scanner.close();
+    }
+}
