@@ -1,0 +1,32 @@
+// Class A definition (as provided)
+class A {
+    // Field x in class A, initialized to hexadecimal 1a (decimal 26)
+    public int x = 0x1a;
+
+    // Method display in class A, prints the value of x accessible from within A
+    public void display() {
+        System.out.println(x); // Accesses A.x
+    }
+}
+
+// Class B definition, inherits from A (as provided)
+class B extends A {
+    // Field x in class B, initialized to hexadecimal 1b (decimal 27)
+    // This field HIDES the field x from class A
+    public int x = 0x1b;
+    // Inherits display() from A
+}
+
+public class Main {
+    public static void main(String[] args) {
+
+        // Khai báo đối tượng b thuộc lớp A. Đối tượng b được khởi tạo bằng một đối tượng thuộc lớp B.
+        // Compile-time type A, Runtime type B
+        A b = new B();
+
+        // Gọi phương thức display() của đối tượng b.
+        // Executes the display() method inherited from A.
+        // Inside A.display(), 'x' refers to A.x.
+        b.display();
+    }
+}
