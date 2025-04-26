@@ -1,0 +1,58 @@
+import java.util.Scanner; // Import Scanner để đọc dữ liệu
+
+// 1. Định nghĩa ngoại lệ mới FileNameFormatException
+// Kế thừa từ lớp Exception (là một checked exception)
+class FileNameFormatException extends Exception {
+    // Constructor nhận một thông điệp lỗi
+    public FileNameFormatException(String message) {
+        // Gọi constructor của lớp cha (Exception) để lưu trữ thông điệp
+        super(message);
+    }
+}
+
+// Lớp chứa các phương thức xử lý file
+class Test {
+    // Phương thức xử lý việc mở file, bắt các ngoại lệ có thể xảy ra
+    public static void open_file(String s) {
+        try {
+            // 2. Gọi phương thức f() có khả năng ném ngoại lệ FileNameFormatException
+            f(s);
+            // Nếu phương thức f(s) chạy xong mà không ném ngoại lệ, nghĩa là tên file hợp lệ
+            System.out.println("File opened");
+        } catch (FileNameFormatException fname) {
+            // Bắt CỤ THỂ ngoại lệ FileNameFormatException
+            // In ra thông điệp được gắn với ngoại lệ khi nó được ném ra
+            System.out.println(fname.getMessage());
+        } catch (Exception e) {
+            // Bắt các ngoại lệ CHUNG khác nếu có (mặc dù trong logic này ít khả năng xảy ra)
+            System.out.println("Exception");
+        }
+    }
+
+    // 3. Định nghĩa phương thức f(String s)
+    // Phương thức này kiểm tra tên file và NÉM ngoại lệ nếu cần
+    // Nó phải khai báo 'throws FileNameFormatException' vì đây là checked exception
+    public static void f(String s) throws FileNameFormatException {
+        // Kiểm tra xem chuỗi tên file 's' có chứa dấu cách " " hay không
+        if (s.contains(" ")) {
+            // Nếu có chứa dấu cách, tạo và NÉM (throw) một đối tượng FileNameFormatException
+            // Truyền vào thông điệp lỗi mong muốn khi ngoại lệ này bị bắt
+            throw new FileNameFormatException("File name format");
+        }
+        // Nếu không chứa dấu cách, phương thức kết thúc bình thường mà không làm gì thêm
+    }
+}
+
+// Lớp Main để chạy chương trình
+public class Main {
+    public static void main(String[] args) {
+        // Tạo Scanner để đọc từ bàn phím
+        Scanner sc = new Scanner(System.in);
+        // Đọc cả dòng tên file
+        String s = sc.nextLine();
+        // Gọi phương thức open_file của lớp Test để xử lý tên file đã nhập
+        Test.open_file(s);
+        // Đóng Scanner sau khi dùng xong
+        sc.close();
+    }
+}
