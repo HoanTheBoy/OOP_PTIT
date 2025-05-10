@@ -1,0 +1,146 @@
+import java.util.Scanner;
+import java.text.DecimalFormat; // Used for consistent output formatting
+
+// Lớp cha: Teacher (Giảng viên)
+class Teacher {
+    protected String name;        // Họ tên
+    protected double baseSalary;  // Lương cơ bản
+
+    // Constructor
+    public Teacher(String name, double baseSalary) {
+        this.name = name;
+        this.baseSalary = baseSalary;
+    }
+
+    // Getter/Setter for name
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Getter/Setter for baseSalary
+    public double getBaseSalary() {
+        return baseSalary;
+    }
+
+    public void setBaseSalary(double baseSalary) {
+        this.baseSalary = baseSalary;
+    }
+
+    // getInfo(): Trả về thông tin giảng viên
+    public String getInfo() {
+        // The problem statement output format doesn't directly use this method's return string
+        // for detailed info, but it's good practice to have a basic implementation.
+        return "Họ tên: " + this.name;
+    }
+
+    // calculateSalary(): Mặc định trả về lương cơ bản
+    public double calculateSalary() {
+        return this.baseSalary;
+    }
+}
+
+// Lớp con 1: PermanentLecturer (Giảng viên cơ hữu)
+class PermanentLecturer extends Teacher {
+    private double researchAllowance; // Phụ cấp nghiên cứu khoa học
+
+    public PermanentLecturer(String name, double baseSalary, double researchAllowance) {
+        super(name, baseSalary);
+        this.researchAllowance = researchAllowance;
+    }
+
+    public double getResearchAllowance() {
+        return researchAllowance;
+    }
+
+    public void setResearchAllowance(double researchAllowance) {
+        this.researchAllowance = researchAllowance;
+    }
+
+    // Ghi đè phương thức calculateSalary()
+    @Override
+    public double calculateSalary() {
+        return super.getBaseSalary() + this.researchAllowance; // baseSalary + researchAllowance
+    }
+}
+
+// Lớp con 2: VisitingLecturer (Giảng viên thỉnh giảng)
+class VisitingLecturer extends Teacher {
+    private int teachingHours;    // số giờ giảng dạy
+    private double paymentPerHour; // mức trả theo giờ
+
+    public VisitingLecturer(String name, int teachingHours, double paymentPerHour) {
+        // For VisitingLecturer, "baseSalary" from Teacher class
+        // isn't directly applicable as per input/output format.
+        // We pass 0 as it's not used for their salary calculation or explicit display.
+        super(name, 0);
+        this.teachingHours = teachingHours;
+        this.paymentPerHour = paymentPerHour;
+    }
+
+    public int getTeachingHours() {
+        return teachingHours;
+    }
+
+    public void setTeachingHours(int teachingHours) {
+        this.teachingHours = teachingHours;
+    }
+
+    public double getPaymentPerHour() {
+        return paymentPerHour;
+    }
+
+    public void setPaymentPerHour(double paymentPerHour) {
+        this.paymentPerHour = paymentPerHour;
+    }
+
+    // Ghi đè phương thức calculateSalary()
+    @Override
+    public double calculateSalary() {
+        return this.teachingHours * this.paymentPerHour; // teachingHours * paymentPerHour
+    }
+}
+
+// Lớp Main
+public class Main {
+    private static final DecimalFormat df = new DecimalFormat("0.0"); // For outputting one decimal place
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("--- Thông tin giảng viên ---");
+
+        for (int i = 0; i < 2; i++) { // Process two teachers
+            String teacherTypeInput = sc.nextLine();
+            String name = sc.nextLine();
+
+            Teacher teacher = null;
+            String displayType = "";
+
+            if ("PermanentLecturer".equals(teacherTypeInput)) {
+                double baseSalary = Double.parseDouble(sc.nextLine());
+                double researchAllowance = Double.parseDouble(sc.nextLine());
+                teacher = new PermanentLecturer(name, baseSalary, researchAllowance);
+                displayType = "Permanent";
+            } else if ("VisitingLecturer".equals(teacherTypeInput)) {
+                int teachingHours = Integer.parseInt(sc.nextLine());
+                double paymentPerHour = Double.parseDouble(sc.nextLine());
+                teacher = new VisitingLecturer(name, teachingHours, paymentPerHour);
+                displayType = "Visiting";
+            }
+
+            if (teacher != null) {
+                System.out.println("Loại giảng viên: " + displayType);
+                System.out.println("Họ tên: " + teacher.getName());
+                // The specific attributes like "Lương cơ bản", "Phụ cấp" etc.
+                // are not printed individually in the example output for this problem,
+                // only "Lương thực nhận".
+                System.out.println("Lương thực nhận: " + df.format(teacher.calculateSalary()));
+            }
+        }
+        sc.close();
+    }
+}
