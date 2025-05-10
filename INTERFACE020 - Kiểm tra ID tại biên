@@ -1,0 +1,122 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+// Interface Identifiable
+interface Identifiable {
+    String getId();
+}
+
+// Class Human
+class Human implements Identifiable {
+    private String name;
+    private int age;
+    private String id;
+
+    // Constructor for Human
+    public Human(String name, int age, String id) {
+        this.name = name;
+        this.age = age;
+        this.id = id;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+}
+
+// Class Robot
+class Robot implements Identifiable {
+    private String model;
+    private String id;
+
+    // Constructor for Robot
+    public Robot(String model, String id) {
+        this.model = model;
+        this.id = id;
+    }
+
+    // Getters
+    public String getModel() {
+        return model;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+}
+
+// Main class
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases (always 1 in this specific problem)
+        int numTestCases = Integer.parseInt(scanner.nextLine()); 
+
+        for (int t = 0; t < numTestCases; t++) {
+            List<Identifiable> entities = new ArrayList<>();
+            String line;
+
+            // Read entity information until "End"
+            while (!(line = scanner.nextLine()).equals("End")) {
+                String[] parts = line.split("\\s+"); // Split by one or more spaces
+
+                if (parts[0].equals("Human")) {
+                    // Human {name} {age} {id}
+                    // The name can contain spaces, so we need to reconstruct it.
+                    // The last two parts are age and id.
+                    String id = parts[parts.length - 1];
+                    int age = Integer.parseInt(parts[parts.length - 2]);
+                    
+                    StringBuilder nameBuilder = new StringBuilder();
+                    for (int i = 1; i < parts.length - 2; i++) {
+                        nameBuilder.append(parts[i]);
+                        if (i < parts.length - 3) { // Add space if not the last part of the name
+                            nameBuilder.append(" ");
+                        }
+                    }
+                    String name = nameBuilder.toString();
+                    entities.add(new Human(name, age, id));
+
+                } else if (parts[0].equals("Robot")) {
+                    // Robot {model} {id}
+                    // The model can contain spaces.
+                    // The last part is the id.
+                    String id = parts[parts.length - 1];
+                    StringBuilder modelBuilder = new StringBuilder();
+                    for (int i = 1; i < parts.length - 1; i++) {
+                        modelBuilder.append(parts[i]);
+                        if (i < parts.length - 2) { // Add space if not the last part of the model
+                            modelBuilder.append(" ");
+                        }
+                    }
+                    String model = modelBuilder.toString();
+                    entities.add(new Robot(model, id));
+                }
+            }
+
+            // Read the suffix to check against
+            String idSuffix = scanner.nextLine();
+
+            // Check and print matching IDs
+            for (Identifiable entity : entities) {
+                if (entity.getId().endsWith(idSuffix)) {
+                    System.out.println(entity.getId());
+                }
+            }
+        }
+        scanner.close();
+    }
+}
