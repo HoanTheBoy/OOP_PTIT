@@ -1,0 +1,139 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.text.DecimalFormat;
+
+// Interface Identifiable
+interface Identifiable {
+    String getId();
+}
+
+// Interface Payable
+interface Payable {
+    double calculateMonthlyPay();
+}
+
+// Class FullTime
+class FullTime implements Identifiable, Payable {
+    private String name;
+    private String id;
+    private double monthlySalary;
+
+    // Constructor
+    public FullTime(String name, String id, double monthlySalary) {
+        this.name = name;
+        this.id = id;
+        this.monthlySalary = monthlySalary;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    public double getMonthlySalary() {
+        return monthlySalary;
+    }
+
+    @Override
+    public double calculateMonthlyPay() {
+        return this.monthlySalary;
+    }
+}
+
+// Class PartTime
+class PartTime implements Identifiable, Payable {
+    private String name;
+    private String id;
+    private double hourlyRate;
+    private int hoursWorked;
+
+    // Constructor
+    public PartTime(String name, String id, double hourlyRate, int hoursWorked) {
+        this.name = name;
+        this.id = id;
+        this.hourlyRate = hourlyRate;
+        this.hoursWorked = hoursWorked;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    public double getHourlyRate() {
+        return hourlyRate;
+    }
+
+    public int getHoursWorked() {
+        return hoursWorked;
+    }
+
+    @Override
+    public double calculateMonthlyPay() {
+        return this.hourlyRate * this.hoursWorked;
+    }
+}
+
+// Main class
+public class Main {
+    private static final DecimalFormat df = new DecimalFormat("0.00");
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases (always 1 for this problem)
+        int numTestCases = Integer.parseInt(scanner.nextLine());
+
+        for (int t = 0; t < numTestCases; t++) {
+            List<Payable> employees = new ArrayList<>();
+            String line;
+
+            while (!(line = scanner.nextLine()).equals("Calculate")) {
+                String[] parts = line.split("\\s+", 2); // Split into type and rest
+                String employeeType = parts[0];
+                String details = parts[1];
+
+                // Find the first quote for the name
+                int firstQuoteIndex = details.indexOf('"');
+                // Find the second quote for the name
+                int secondQuoteIndex = details.indexOf('"', firstQuoteIndex + 1);
+
+                String name = details.substring(firstQuoteIndex + 1, secondQuoteIndex);
+                String remainingDetails = details.substring(secondQuoteIndex + 1).trim();
+                String[] numericParts = remainingDetails.split("\\s+");
+
+                if (employeeType.equals("FullTime")) {
+                    // FullTime "{name}" {id} {monthlySalary}
+                    String id = numericParts[0];
+                    double monthlySalary = Double.parseDouble(numericParts[1]);
+                    employees.add(new FullTime(name, id, monthlySalary));
+                } else if (employeeType.equals("PartTime")) {
+                    // PartTime "{name}" {id} {hourlyRate} {hoursWorked}
+                    String id = numericParts[0];
+                    double hourlyRate = Double.parseDouble(numericParts[1]);
+                    int hoursWorked = Integer.parseInt(numericParts[2]);
+                    employees.add(new PartTime(name, id, hourlyRate, hoursWorked));
+                }
+            }
+
+            double totalMonthlyPayroll = 0.0;
+            for (Payable employee : employees) {
+                totalMonthlyPayroll += employee.calculateMonthlyPay();
+            }
+
+            System.out.println("Total Monthly Payroll: " + df.format(totalMonthlyPayroll));
+        }
+        scanner.close();
+    }
+}
