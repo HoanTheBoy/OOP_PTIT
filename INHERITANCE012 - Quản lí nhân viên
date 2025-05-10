@@ -1,0 +1,147 @@
+import java.util.Scanner;
+import java.text.DecimalFormat; // Not strictly needed if using String.format
+
+// Lớp cha: Employee (Nhân viên)
+class Employee {
+    protected String name;    // họ tên
+    protected double salary;  // lương cơ bản
+
+    // Constructor
+    public Employee(String name, double salary) {
+        this.name = name;
+        this.salary = salary;
+    }
+
+    // Getter/Setter for name
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Getter/Setter for salary
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+
+    // getInfo(): trả về thông tin nhân viên (cơ bản)
+    public String getInfo() {
+        // The problem doesn't specify the exact format of getInfo's return string,
+        // and Main prints attributes directly. A basic implementation is sufficient.
+        return "Họ tên: " + this.name;
+    }
+
+    // calculateSalary(): trả về lương thực nhận (mặc định = lương cơ bản)
+    public double calculateSalary() {
+        return this.salary;
+    }
+}
+
+// Lớp con 1: FullTimeEmployee (Nhân viên chính thức)
+class FullTimeEmployee extends Employee {
+    private double bonus; // tiền thưởng
+
+    public FullTimeEmployee(String name, double salary, double bonus) {
+        super(name, salary);
+        this.bonus = bonus;
+    }
+
+    public double getBonus() {
+        return bonus;
+    }
+
+    public void setBonus(double bonus) {
+        this.bonus = bonus;
+    }
+
+    // Ghi đè phương thức calculateSalary()
+    @Override
+    public double calculateSalary() {
+        return super.getSalary() + this.bonus; // lương cơ bản + thưởng
+    }
+}
+
+// Lớp con 2: PartTimeEmployee (Nhân viên thời vụ)
+class PartTimeEmployee extends Employee {
+    private int hoursWorked;   // số giờ làm việc
+    private double hourlyRate; // tiền công mỗi giờ
+
+    public PartTimeEmployee(String name, int hoursWorked, double hourlyRate) {
+        // For PartTimeEmployee, "salary" (lương cơ bản) from Employee class
+        // is not directly applicable as per input/output for PartTime.
+        // We pass 0 as it's not used for their salary calculation or display.
+        super(name, 0);
+        this.hoursWorked = hoursWorked;
+        this.hourlyRate = hourlyRate;
+    }
+
+    public int getHoursWorked() {
+        return hoursWorked;
+    }
+
+    public void setHoursWorked(int hoursWorked) {
+        this.hoursWorked = hoursWorked;
+    }
+
+    public double getHourlyRate() {
+        return hourlyRate;
+    }
+
+    public void setHourlyRate(double hourlyRate) {
+        this.hourlyRate = hourlyRate;
+    }
+
+    // Ghi đè phương thức calculateSalary()
+    @Override
+    public double calculateSalary() {
+        return this.hoursWorked * this.hourlyRate; // hoursWorked * hourlyRate
+    }
+}
+
+// Lớp Main
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("--- Thông tin nhân viên ---");
+
+        for (int i = 0; i < 2; i++) {
+            if (i > 0) {
+                System.out.println(); // Ngăn cách 2 loại nhân viên
+            }
+
+            String employeeType = sc.nextLine();
+            String name = sc.nextLine();
+
+            Employee emp = null;
+
+            System.out.println("Loại: " + employeeType);
+            System.out.println("Họ tên: " + name);
+
+            if ("FullTime".equals(employeeType)) {
+                double baseSalary = Double.parseDouble(sc.nextLine());
+                double bonus = Double.parseDouble(sc.nextLine());
+                emp = new FullTimeEmployee(name, baseSalary, bonus);
+                System.out.printf("Lương cơ bản: %.1f\n", baseSalary);
+                System.out.printf("Thưởng: %.1f\n", bonus);
+            } else if ("PartTime".equals(employeeType)) {
+                int hoursWorked = Integer.parseInt(sc.nextLine());
+                double hourlyRate = Double.parseDouble(sc.nextLine());
+                emp = new PartTimeEmployee(name, hoursWorked, hourlyRate);
+                System.out.printf("Số giờ làm việc: %d giờ\n", hoursWorked);
+                System.out.printf("Tiền công mỗi giờ: %.1f\n", hourlyRate);
+            }
+
+            if (emp != null) {
+                System.out.printf("=> Lương thực nhận: %.1f\n", emp.calculateSalary());
+            }
+        }
+        sc.close();
+    }
+}
