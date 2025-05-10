@@ -1,0 +1,126 @@
+import java.util.Scanner;
+import java.text.DecimalFormat; // For formatting the output
+
+// Class Product
+class Product {
+    private String productId;
+    private String name;
+    private double price;
+
+    // Constructor
+    public Product(String productId, String name, double price) {
+        this.productId = productId;
+        this.name = name;
+        this.price = price;
+    }
+
+    // Getters
+    public String getProductId() {
+        return productId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    // Setters (if needed, though not strictly required by the problem for direct use in main)
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+}
+
+// Class Order
+class Order {
+    private String orderId;
+    private Product product; // Composition: Order "has a" Product
+    private int quantity;
+
+    // Constructor
+    public Order(String orderId, Product product, int quantity) {
+        this.orderId = orderId;
+        this.product = product;
+        this.quantity = quantity;
+    }
+
+    // Method to calculate total price
+    public double calculateTotal() {
+        return this.quantity * this.product.getPrice();
+    }
+
+    // Method to display order information
+    public void display() {
+        DecimalFormat df = new DecimalFormat("0.0"); // Format to one decimal place
+
+        System.out.println("--- Thông tin đơn hàng ---");
+        System.out.println("Đơn hàng: " + this.orderId);
+        System.out.println("Sản phẩm: " + this.product.getName() + " (Mã: " + this.product.getProductId() + ")");
+        System.out.println("Giá: " + df.format(this.product.getPrice()));
+        System.out.println("Số lượng: " + this.quantity);
+        System.out.println("Tổng tiền: " + df.format(calculateTotal()));
+    }
+
+    // Getters (if needed)
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    // Setters (if needed)
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+}
+
+// Main class
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input for Product
+        String productId = scanner.nextLine();
+        String productName = scanner.nextLine();
+        double productPrice = Double.parseDouble(scanner.nextLine());
+
+        // Create Product object
+        Product product = new Product(productId, productName, productPrice);
+
+        // Input for Order
+        String orderId = scanner.nextLine();
+        int quantity = Integer.parseInt(scanner.nextLine());
+
+        // Create Order object
+        Order order = new Order(orderId, product, quantity);
+
+        // Display order information
+        order.display();
+
+        scanner.close();
+    }
+}
