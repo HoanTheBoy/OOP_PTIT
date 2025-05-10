@@ -1,0 +1,112 @@
+import java.text.DecimalFormat;
+import java.util.Scanner;
+
+// Abstract base class Car
+abstract class Car {
+    protected double price; // Base price
+    protected int year;
+    public static double maxSalePrice = 0.0; // Static member to track max sale price
+
+    // Formatter for currency output, ensuring commas and two decimal places
+    private static final DecimalFormat PRICE_FORMATTER = new DecimalFormat("#,##0.00");
+
+    public Car(double price, int year) {
+        this.price = price;
+        this.year = year;
+    }
+
+    // Abstract method to be implemented by subclasses
+    // This method should calculate the sale price AND update Car.maxSalePrice
+    public abstract double calculateSalePrice();
+
+    @Override
+    public String toString() {
+        // Calculate the sale price. The implementation in subclasses will update maxSalePrice.
+        double currentSalePrice = this.calculateSalePrice();
+        return "Price: " + PRICE_FORMATTER.format(currentSalePrice) + " VND | Year: " + this.year;
+    }
+
+    public static String getFormattedMaxSalePrice() {
+        return PRICE_FORMATTER.format(maxSalePrice);
+    }
+}
+
+// ClassicCar subclass
+class ClassicCar extends Car {
+    private static final double REGISTRATION_TAX_MULTIPLIER = 1.12; // For 12% tax
+    private static final double PLATE_FEE = 20000000; // 20 million VND
+
+    public ClassicCar(double price, int year) {
+        super(price, year);
+    }
+
+    @Override
+    public double calculateSalePrice() {
+        double salePrice = super.price * REGISTRATION_TAX_MULTIPLIER + PLATE_FEE;
+        if (salePrice > Car.maxSalePrice) {
+            Car.maxSalePrice = salePrice;
+        }
+        return salePrice;
+    }
+}
+
+// SportCar subclass
+class SportCar extends Car {
+    public SportCar(double price, int year) {
+        super(price, year);
+    }
+
+    @Override
+    public double calculateSalePrice() {
+        double salePriceFactor;
+        if (super.year > 2018) {
+            salePriceFactor = 1.0 - 0.20; // 20% discount means 80% of original price
+        } else if (super.year > 2010) {
+            salePriceFactor = 1.0 - 0.50; // 50% discount
+        } else {
+            salePriceFactor = 1.0 - 0.90; // 90% discount
+        }
+        double salePrice = super.price * salePriceFactor;
+
+        if (salePrice > Car.maxSalePrice) {
+            Car.maxSalePrice = salePrice;
+        }
+        return salePrice;
+    }
+}
+
+// Main class to handle input and output
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int numTestCases = Integer.parseInt(sc.nextLine());
+
+        // Car.maxSalePrice is static, so it's initialized once when the Car class is loaded.
+        // If this program were part of a larger system where main could be called multiple times
+        // for different sets of test cases, you might want to reset Car.maxSalePrice = 0.0; here.
+        // For this problem's typical execution (one run for the given input), it's fine.
+
+        for (int i = 0; i < numTestCases; i++) {
+            String[] inputParts = sc.nextLine().split("\\s+"); // Split by one or more whitespace
+            String type = inputParts[0];
+            double basePrice = Double.parseDouble(inputParts[1]);
+            int year = Integer.parseInt(inputParts[2]);
+
+            Car car = null;
+            if ("SC".equals(type)) {
+                car = new SportCar(basePrice, year);
+            } else if ("CC".equals(type)) {
+                car = new ClassicCar(basePrice, year);
+            }
+
+            if (car != null) {
+                // The toString() method internally calls calculateSalePrice(),
+                // which in turn updates Car.maxSalePrice.
+                System.out.println(car.toString());
+            }
+        }
+
+        System.out.println("Most Expensive: " + Car.getFormattedMaxSalePrice() + " VND");
+        sc.close();
+    }
+}
