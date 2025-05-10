@@ -1,0 +1,128 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.text.DecimalFormat;
+
+// Interface PricedItem
+interface PricedItem {
+    double getPrice();
+}
+
+// Interface SourceableItem
+interface SourceableItem {
+    String getSourceName();
+}
+
+// Class Dish
+class Dish implements PricedItem, SourceableItem {
+    private String name;
+    private double price;
+    private String restaurantName;
+
+    // Constructor
+    public Dish(String name, double price, String restaurantName) {
+        this.name = name;
+        this.price = price;
+        this.restaurantName = restaurantName;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public double getPrice() {
+        return price;
+    }
+
+    @Override
+    public String getSourceName() {
+        return restaurantName;
+    }
+}
+
+// Main class
+public class Main {
+    private static final DecimalFormat PRICE_FORMATTER = new DecimalFormat("0.00");
+
+    // Helper method to extract quoted strings
+    private static String extractQuotedString(String input, int startIndex) {
+        int firstQuote = input.indexOf('"', startIndex);
+        if (firstQuote == -1) return null;
+        int secondQuote = input.indexOf('"', firstQuote + 1);
+        if (secondQuote == -1) return null;
+        return input.substring(firstQuote + 1, secondQuote);
+    }
+    
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the number of test cases (always 1 for this problem)
+        int numTestCases = Integer.parseInt(scanner.nextLine());
+
+        for (int t = 0; t < numTestCases; t++) {
+            List<Dish> order = new ArrayList<>();
+            String line;
+
+            // Regex to parse the dish line: Dish "{dishName}" {price} "{restaurantName}"
+            // Group 1: dishName (inside quotes)
+            // Group 2: price (double)
+            // Group 3: restaurantName (inside quotes)
+            Pattern dishPattern = Pattern.compile("^Dish \"([^\"]+)\" ([0-9]+\\.?[0-9]*|\"[^\"]+\") \"([^\"]+)\"$");
+            // A more robust pattern for price considering it's not quoted.
+            // The challenge is that price is not quoted, but names are.
+            // Simpler approach: Extract quoted parts first.
+
+            while (!(line = scanner.nextLine()).equals("Checkout")) {
+                if (line.startsWith("Dish ")) {
+                    // Extract first quoted string (dishName)
+                    String dishName = extractQuotedString(line, 0);
+                    if (dishName == null) continue; // Invalid format
+
+                    // Find the index after the first quoted string to look for price
+                    int afterDishNameQuote = line.indexOf('"', line.indexOf('"') + 1) + 1;
+                    
+                    // Extract second quoted string (restaurantName) from the end
+                    int lastQuote = line.lastIndexOf('"');
+                    if (lastQuote == -1) continue; // Invalid format
+                    int secondToLastQuote = line.lastIndexOf('"', lastQuote -1);
+                    if (secondToLastQuote == -1 || secondToLastQuote <= afterDishNameQuote) continue; // Invalid format
+                    String restaurantName = line.substring(secondToLastQuote + 1, lastQuote);
+                    
+                    // The price is between the first and second quoted string
+                    String priceString = line.substring(afterDishNameQuote, secondToLastQuote).trim();
+                    
+                    try {
+                        double price = Double.parseDouble(priceString);
+                        order.add(new Dish(dishName, price, restaurantName));
+                    } catch (NumberFormatException e) {
+                        // Handle case where price parsing might fail (though problem implies valid numbers)
+                        // System.err.println("Error parsing price for line: " + line);
+                    }
+                }
+            }
+
+            // Read the target restaurant name
+            String targetRestaurantLine = scanner.nextLine();
+            String targetRestaurantName = targetRestaurantLine;
+            if (targetRestaurantLine.startsWith("\"") && targetRestaurantLine.endsWith("\"") && targetRestaurantLine.length() >=2) {
+                targetRestaurantName = targetRestaurantLine.substring(1, targetRestaurantLine.length() - 1);
+            }
+
+
+            // Filter and print dishes
+            boolean found = false;
+            for (Dish dish : order) {
+                if (dish.getSourceName().equals(targetRestaurantName)) {
+                    System.out.println("\"" + dish.getName() + "\" - " + PRICE_FORMATTER.format(dish.getPrice()));
+                    found = true;
+                }
+            }
+            // If nothing found, output is empty as per requirement.
+        }
+        scanner.close();
+    }
+}
