@@ -1,0 +1,130 @@
+import java.util.*;
+import java.util.stream.*;
+
+interface Filter<T> {
+    boolean test(T t);
+}
+
+class GenericFilter {
+    public static <T> List<T> filter(List<T> input, Filter<T> filter) {
+        List<T> result = new ArrayList<>();
+        for (T item : input) {
+            if (filter.test(item)) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+}
+
+class IntegerEvenFilter implements Filter<Integer> {
+    public boolean test(Integer n) {
+        return n % 2 == 0;
+    }
+}
+
+class StringLengthFilter implements Filter<String> {
+    private int minLength;
+
+    public StringLengthFilter(int minLength) {
+        this.minLength = minLength;
+    }
+
+    public boolean test(String s) {
+        return s.length() >= minLength;
+    }
+}
+
+class Employee {
+    private String name;
+    private double salary;
+
+    public Employee(String name, double salary) {
+        this.name = name;
+        this.salary = salary;
+    }
+
+    public String getName() { return name; }
+    public double getSalary() { return salary; }
+
+    @Override
+    public String toString() {
+        return name + " " + salary;
+    }
+}
+
+class EmployeeSalaryFilter implements Filter<Employee> {
+    private double minSalary;
+
+    public EmployeeSalaryFilter(double minSalary) {
+        this.minSalary = minSalary;
+    }
+
+    public boolean test(Employee e) {
+        return e.getSalary() >= minSalary;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine(); // bỏ qua dòng đầu tiên (số test case, luôn = 1)
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            if (line.equals("End")) break;
+
+            String[] parts = line.split(" ");
+            switch (parts[0]) {
+                case "FilterIntEven": {
+                    int n = Integer.parseInt(parts[1]);
+                    List<Integer> nums = new ArrayList<>();
+                    for (int i = 2; i < 2 + n; i++) {
+                        nums.add(Integer.parseInt(parts[i]));
+                    }
+                    List<Integer> result = GenericFilter.filter(nums, new IntegerEvenFilter());
+                    printResult(result);
+                    break;
+                }
+                case "FilterStringLength": {
+                    int minLen = Integer.parseInt(parts[1]);
+                    int n = Integer.parseInt(parts[2]);
+                    List<String> strs = new ArrayList<>();
+                    for (int i = 3; i < 3 + n; i++) {
+                        strs.add(parts[i]);
+                    }
+                    List<String> result = GenericFilter.filter(strs, new StringLengthFilter(minLen));
+                    printResult(result);
+                    break;
+                }
+                case "FilterEmployeeSalary": {
+                    double minSalary = Double.parseDouble(parts[1]);
+                    int n = Integer.parseInt(parts[2]);
+                    List<Employee> employees = new ArrayList<>();
+                    for (int i = 3; i < 3 + n * 2; i += 2) {
+                        String name = parts[i];
+                        double salary = Double.parseDouble(parts[i + 1]);
+                        employees.add(new Employee(name, salary));
+                    }
+                    List<Employee> result = GenericFilter.filter(employees, new EmployeeSalaryFilter(minSalary));
+                    printResult(result);
+                    break;
+                }
+                default:
+                    System.out.println("Invalid filter type.");
+            }
+        }
+
+        scanner.close();
+    }
+
+    private static <T> void printResult(List<T> list) {
+        if (list.isEmpty()) {
+            System.out.println("None");
+        } else {
+            for (T item : list) {
+                System.out.println(item);
+            }
+        }
+    }
+}
