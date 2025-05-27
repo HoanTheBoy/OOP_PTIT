@@ -1,0 +1,118 @@
+import java.util.*;
+
+interface Mapper<T, R> {
+    R map(T t);
+}
+
+class GenericMapper {
+    public static <T, R> List<R> map(List<T> input, Mapper<T, R> mapper) {
+        List<R> result = new ArrayList<>();
+        for (T item : input) {
+            result.add(mapper.map(item));
+        }
+        return result;
+    }
+}
+
+// Mapper: Integer -> String
+class IntegerToStringMapper implements Mapper<Integer, String> {
+    public String map(Integer t) {
+        return String.valueOf(t);
+    }
+}
+
+// Mapper: String -> Integer (length)
+class StringToLengthMapper implements Mapper<String, Integer> {
+    public Integer map(String t) {
+        return t.length();
+    }
+}
+
+// Employee class
+class Employee {
+    private String name;
+    private double salary;
+
+    public Employee(String name, double salary) {
+        this.name = name;
+        this.salary = salary;
+    }
+
+    public String getName() { return name; }
+    public double getSalary() { return salary; }
+
+    @Override
+    public String toString() {
+        return name + ":" + salary;
+    }
+}
+
+// Mapper: Employee -> String
+class EmployeeToStringMapper implements Mapper<Employee, String> {
+    public String map(Employee e) {
+        return e.toString();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine(); // Bỏ qua số test case, luôn = 1
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            if (line.equals("End")) break;
+
+            String[] parts = line.split(" ");
+            String command = parts[0];
+
+            switch (command) {
+                case "MapIntToString": {
+                    int n = Integer.parseInt(parts[1]);
+                    List<Integer> nums = new ArrayList<>();
+                    for (int i = 2; i < 2 + n; i++) {
+                        nums.add(Integer.parseInt(parts[i]));
+                    }
+                    List<String> result = GenericMapper.map(nums, new IntegerToStringMapper());
+                    printList(result);
+                    break;
+                }
+
+                case "MapStringToLength": {
+                    int n = Integer.parseInt(parts[1]);
+                    List<String> strs = new ArrayList<>();
+                    for (int i = 2; i < 2 + n; i++) {
+                        strs.add(parts[i]);
+                    }
+                    List<Integer> result = GenericMapper.map(strs, new StringToLengthMapper());
+                    printList(result);
+                    break;
+                }
+
+                case "MapEmployeeToString": {
+                    int n = Integer.parseInt(parts[1]);
+                    List<Employee> emps = new ArrayList<>();
+                    for (int i = 2; i < 2 + n * 2; i += 2) {
+                        String name = parts[i];
+                        double salary = Double.parseDouble(parts[i + 1]);
+                        emps.add(new Employee(name, salary));
+                    }
+                    List<String> result = GenericMapper.map(emps, new EmployeeToStringMapper());
+                    printList(result);
+                    break;
+                }
+
+                default:
+                    System.out.println("Unknown command");
+            }
+        }
+
+        scanner.close();
+    }
+
+    private static <T> void printList(List<T> list) {
+        for (T item : list) {
+            System.out.println(item);
+        }
+    }
+}
