@@ -1,0 +1,161 @@
+import java.util.*;
+import java.util.stream.Collectors;
+
+// Pair class (can be reused for other problems)
+class Pair<A, B> {
+    private final A first;
+    private final B second;
+
+    public Pair(A first, B second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    public A getFirst() {
+        return first;
+    }
+
+    public B getSecond() {
+        return second;
+    }
+
+    @Override
+    public String toString() {
+        return first + " " + second;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pair<?, ?> pair = (Pair<?, ?>) o;
+        return Objects.equals(first, pair.first) &&
+               Objects.equals(second, pair.second);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first, second);
+    }
+}
+
+class BiMap<A, B> {
+    private final Map<A, B> forward;
+    private final Map<B, A> backward;
+
+    public BiMap() {
+        // Use LinkedHashMap to preserve insertion order for keySet, valueSet, entrySet
+        this.forward = new LinkedHashMap<>();
+        this.backward = new LinkedHashMap<>();
+    }
+
+    public boolean put(A a, B b) {
+        if (forward.containsKey(a) || backward.containsKey(b)) {
+            return false;
+        }
+        forward.put(a, b);
+        backward.put(b, a);
+        return true;
+    }
+
+    public boolean removeByA(A a) {
+        if (forward.containsKey(a)) {
+            B b = forward.remove(a);
+            backward.remove(b);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeByB(B b) {
+        if (backward.containsKey(b)) {
+            A a = backward.remove(b);
+            forward.remove(a);
+            return true;
+        }
+        return false;
+    }
+
+    public Optional<B> getByA(A a) {
+        return Optional.ofNullable(forward.get(a));
+    }
+
+    public Optional<A> getByB(B b) {
+        return Optional.ofNullable(backward.get(b));
+    }
+
+    public Set<A> keySet() {
+        return new LinkedHashSet<>(forward.keySet());
+    }
+
+    public Set<B> valueSet() {
+        return new LinkedHashSet<>(forward.values());
+    }
+
+    public Set<Pair<A, B>> entrySet() {
+        return forward.entrySet().stream()
+                .map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+}
+
+public class Main { // Main class for GENERIC028
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int numTestCases = Integer.parseInt(sc.nextLine()); // Always 1
+
+        BiMap<String, String> biMap = new BiMap<>();
+
+        String line;
+        while (!(line = sc.nextLine()).equals("End")) {
+            String[] parts = line.split(" ");
+            String command = parts[0];
+
+            switch (command) {
+                case "Put":
+                    String keyPut = parts[1];
+                    String valuePut = parts[2];
+                    System.out.println(biMap.put(keyPut, valuePut));
+                    break;
+                case "RemoveByA":
+                    String keyRemoveA = parts[1];
+                    System.out.println(biMap.removeByA(keyRemoveA));
+                    break;
+                case "RemoveByB":
+                    String valueRemoveB = parts[1];
+                    System.out.println(biMap.removeByB(valueRemoveB));
+                    break;
+                case "GetByA":
+                    String keyGetA = parts[1];
+                    Optional<String> resultA = biMap.getByA(keyGetA);
+                    if (resultA.isPresent()) {
+                        System.out.println(resultA.get());
+                    } else {
+                        System.out.println("None");
+                    }
+                    break;
+                case "GetByB":
+                    String valueGetB = parts[1];
+                    Optional<String> resultB = biMap.getByB(valueGetB);
+                    if (resultB.isPresent()) {
+                        System.out.println(resultB.get());
+                    } else {
+                        System.out.println("None");
+                    }
+                    break;
+                case "KeySet":
+                    biMap.keySet().forEach(System.out::println);
+                    break;
+                case "ValueSet":
+                    biMap.valueSet().forEach(System.out::println);
+                    break;
+                case "EntrySet":
+                    biMap.entrySet().forEach(System.out::println);
+                    break;
+                default:
+                    break;
+            }
+        }
+        sc.close();
+    }
+}
