@@ -1,0 +1,70 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Scanner;
+
+class Job {
+    private String name;
+    private int priority; // Lower value means higher priority
+    private int time;     // Expected completion time
+
+    public Job(String name, int priority, int time) {
+        this.name = name;
+        this.priority = priority;
+        this.time = time;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    @Override
+    public String toString() {
+        return name + " " + priority + " " + time;
+    }
+}
+
+public class Main { // Changed class name to Main
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        int n = Integer.parseInt(scanner.nextLine());
+        List<Job> jobs = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            String[] parts = scanner.nextLine().split(" ");
+            String name = parts[0];
+            int priority = Integer.parseInt(parts[1]);
+            int time = Integer.parseInt(parts[2]);
+            jobs.add(new Job(name, priority, time));
+        }
+
+        // Comparator logic:
+        // 1. Smallest priority value (ascending).
+        // 2. If priorities are equal, smallest time value (ascending).
+        // 3. If priorities and times are equal, job name in alphabetical order (ascending).
+        Comparator<Job> jobComparator = Comparator
+                .comparingInt(Job::getPriority)
+                .thenComparingInt(Job::getTime)
+                .thenComparing(Job::getName);
+
+        // Find the job with the highest priority (which means "smallest" according to the comparator)
+        if (!jobs.isEmpty()) {
+            Job highestPriorityJob = Collections.min(jobs, jobComparator);
+            System.out.println(highestPriorityJob);
+        }
+        // The problem implies N >= 1, so jobs list won't be empty.
+
+        scanner.close();
+    }
+}
