@@ -1,0 +1,173 @@
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
+
+interface Predicate<T> {
+    boolean test(T t);
+}
+
+interface Function<T, R> {
+    R apply(T t);
+}
+
+class Product implements Comparable<Product> {
+    protected String id;
+    protected String name;
+    protected double price;
+
+    public Product(String id, String name, double price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getId() { return id; }
+    public String getName() { return name; }
+    public double getPrice() { return price; }
+
+    @Override
+    public int compareTo(Product o) {
+        return Double.compare(this.price, o.price);
+    }
+
+    @Override
+    public String toString() {
+        return "Product{id='" + id + "', name='" + name + "', price=" + price + "}";
+    }
+}
+
+class Book extends Product {
+    private String author;
+
+    public Book(String id, String name, double price, String author) {
+        super(id, name, price);
+        this.author = author;
+    }
+
+    public String getAuthor() { return author; }
+
+    @Override
+    public String toString() {
+        return "Book{id='" + id + "', name='" + name + "', price=" + price + ", author='" + author + "'}";
+    }
+}
+
+class Warehouse<T> {
+    private List<T> items;
+
+    public Warehouse(List<T> items) {
+        this.items = items;
+    }
+
+    public Optional<T> findById(String id, Function<T, String> idExtractor) {
+        for (T item : items) {
+            if (idExtractor.apply(item).equals(id)) {
+                return Optional.of(item);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public List<T> filter(Predicate<T> predicate) {
+        List<T> result = new ArrayList<>();
+        for (T item : items) {
+            if (predicate.test(item)) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    public List<T> sort(Comparator<T> comparator) {
+        List<T> result = new ArrayList<>(items);
+        result.sort(comparator);
+        return result;
+    }
+
+    public Optional<T> max(Comparator<T> comparator) {
+        return items.stream().max(comparator);
+    }
+
+    public Optional<T> min(Comparator<T> comparator) {
+        return items.stream().min(comparator);
+    }
+
+    public void addItem(T item) {
+        items.add(item);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        sc.nextLine(); // Số test case, luôn bằng 1
+        List<Book> books = new ArrayList<>();
+        Warehouse<Book> warehouse = new Warehouse<>(books);
+
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine().trim();
+            if (line.equals("End")) break;
+
+            String[] tokens = line.split(" ");
+            String command = tokens[0];
+
+            switch (command) {
+                case "AddBook": {
+                    String id = tokens[1];
+                    String name = tokens[2];
+                    double price = Double.parseDouble(tokens[3]);
+                    String author = tokens[4];
+                    warehouse.addItem(new Book(id, name, price, author));
+                    break;
+                }
+
+                case "FindById": {
+                    String id = tokens[1];
+                    Optional<Book> result = warehouse.findById(id, Book::getId);
+                    System.out.println(result.map(Object::toString).orElse("Not found"));
+                    break;
+                }
+
+                case "FilterPriceAbove": {
+                    double threshold = Double.parseDouble(tokens[1]);
+                    List<Book> filtered = warehouse.filter(b -> b.getPrice() > threshold);
+                    printListOrNotFound(filtered);
+                    break;
+                }
+
+                case "SortByName": {
+                    List<Book> sorted = warehouse.sort(Comparator.comparing(Book::getName));
+                    printListOrNotFound(sorted);
+                    break;
+                }
+
+                case "MaxByPrice": {
+                    Optional<Book> max = warehouse.max(Comparator.comparingDouble(Book::getPrice));
+                    System.out.println(max.map(Object::toString).orElse("Not found"));
+                    break;
+                }
+
+                case "MinByPrice": {
+                    Optional<Book> min = warehouse.min(Comparator.comparingDouble(Book::getPrice));
+                    System.out.println(min.map(Object::toString).orElse("Not found"));
+                    break;
+                }
+
+                default:
+                    System.out.println("Unknown command: " + command);
+            }
+        }
+
+        sc.close();
+    }
+
+    private static <T> void printListOrNotFound(List<T> list) {
+        if (list.isEmpty()) {
+            System.out.println("Not found");
+        } else {
+            for (T item : list) {
+                System.out.println(item);
+            }
+        }
+    }
+}
