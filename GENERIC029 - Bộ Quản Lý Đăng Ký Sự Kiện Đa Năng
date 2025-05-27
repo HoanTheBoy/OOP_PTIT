@@ -1,0 +1,172 @@
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+class Person {
+    private final String name;
+    private final int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    @Override
+    public String toString() {
+        return name + " " + age;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return age == person.age && Objects.equals(name, person.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, age);
+    }
+}
+
+class EventRegistry<E, P> {
+    private final Map<E, Set<P>> eventToPeople;
+    private final Map<P, Set<E>> personToEvents;
+
+    public EventRegistry() {
+        // Using HashMap for the main maps, and LinkedHashSet for the sets of people/events
+        // to maintain insertion order within those sets.
+        this.eventToPeople = new HashMap<>();
+        this.personToEvents = new HashMap<>();
+    }
+
+    public void register(E event, P person) {
+        eventToPeople.computeIfAbsent(event, k -> new LinkedHashSet<>()).add(person);
+        personToEvents.computeIfAbsent(person, k -> new LinkedHashSet<>()).add(event);
+    }
+
+    public void unregister(E event, P person) {
+        Set<P> peopleInEvent = eventToPeople.get(event);
+        if (peopleInEvent != null) {
+            peopleInEvent.remove(person);
+            if (peopleInEvent.isEmpty()) {
+                eventToPeople.remove(event); // Optional: clean up empty event entries
+            }
+        }
+
+        Set<E> eventsForPerson = personToEvents.get(person);
+        if (eventsForPerson != null) {
+            eventsForPerson.remove(event);
+            if (eventsForPerson.isEmpty()) {
+                personToEvents.remove(person); // Optional: clean up empty person entries
+            }
+        }
+    }
+
+    public boolean isRegistered(E event, P person) {
+        Set<P> peopleInEvent = eventToPeople.get(event);
+        return peopleInEvent != null && peopleInEvent.contains(person);
+    }
+
+    public Set<P> getPeople(E event) {
+        // Return a copy or an unmodifiable set to protect internal state,
+        // or the direct set if modification is not a concern for this problem's scope.
+        // Collections.emptySet() is immutable.
+        // The LinkedHashSet returned by computeIfAbsent preserves order.
+        return eventToPeople.getOrDefault(event, Collections.emptySet());
+    }
+
+    public Set<E> getEvents(P person) {
+        return personToEvents.getOrDefault(person, Collections.emptySet());
+    }
+
+    public Set<P> filterPeople(E event, Predicate<P> predicate) {
+        Set<P> peopleInEvent = getPeople(event);
+        if (peopleInEvent.isEmpty()) {
+            return Collections.emptySet();
+        }
+        // Stream and collect to a new LinkedHashSet to preserve relative order of filtered items.
+        return peopleInEvent.stream()
+                            .filter(predicate)
+                            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+}
+
+public class Main { // Main class for GENERIC029
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int numTestCases = Integer.parseInt(sc.nextLine()); // Always 1
+
+        EventRegistry<String, Person> registry = new EventRegistry<>();
+
+        String line;
+        while (!(line = sc.nextLine()).equals("End")) {
+            String[] parts = line.split(" ");
+            String command = parts[0];
+
+            String eventName;
+            String personName;
+            int personAge;
+            Person person;
+
+            switch (command) {
+                case "Register":
+                    // Register event name age
+                    eventName = parts[1];
+                    personName = parts[2];
+                    personAge = Integer.parseInt(parts[3]);
+                    person = new Person(personName, personAge);
+                    registry.register(eventName, person);
+                    break;
+                case "Unregister":
+                    // Unregister event name age
+                    eventName = parts[1];
+                    personName = parts[2];
+                    personAge = Integer.parseInt(parts[3]);
+                    person = new Person(personName, personAge);
+                    registry.unregister(eventName, person);
+                    break;
+                case "IsRegistered":
+                    // IsRegistered event name age
+                    eventName = parts[1];
+                    personName = parts[2];
+                    personAge = Integer.parseInt(parts[3]);
+                    person = new Person(personName, personAge);
+                    System.out.println(registry.isRegistered(eventName, person));
+                    break;
+                case "ListPeople":
+                    // ListPeople event
+                    eventName = parts[1];
+                    registry.getPeople(eventName).forEach(System.out::println);
+                    break;
+                case "ListEvents":
+                    // ListEvents name age
+                    personName = parts[1];
+                    personAge = Integer.parseInt(parts[2]);
+                    person = new Person(personName, personAge);
+                    registry.getEvents(person).forEach(System.out::println);
+                    break;
+                case "FilterPeopleByAge":
+                    // FilterPeopleByAge event minAge
+                    eventName = parts[1];
+                    int minAge = Integer.parseInt(parts[2]);
+                    Predicate<Person> agePredicate = p -> p.getAge() >= minAge;
+                    registry.filterPeople(eventName, agePredicate).forEach(System.out::println);
+                    break;
+                default:
+                    // No other commands
+                    break;
+            }
+        }
+        sc.close();
+    }
+}
