@@ -1,0 +1,149 @@
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+// Lớp Pair<A, B>
+class Pair<A, B> {
+    private final A first;
+    private final B second;
+
+    public Pair(A first, B second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    public A getFirst() {
+        return first;
+    }
+
+    public B getSecond() {
+        return second;
+    }
+
+    @Override
+    public String toString() {
+        return first + " " + second;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pair<?, ?> pair = (Pair<?, ?>) o; // Wildcard because actual types of o might be different
+        return Objects.equals(first, pair.first) &&
+               Objects.equals(second, pair.second);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first, second);
+    }
+}
+
+// Lớp PairManager<A, B>
+class PairManager<A, B> {
+    private List<Pair<A, B>> pairs;
+
+    public PairManager() {
+        this.pairs = new ArrayList<>();
+    }
+
+    public void add(Pair<A, B> pair) {
+        this.pairs.add(pair);
+    }
+
+    public void remove(Pair<A, B> pair) {
+        this.pairs.remove(pair); // Relies on Pair.equals()
+    }
+
+    public List<Pair<A, B>> filter(Predicate<Pair<A, B>> predicate) {
+        return this.pairs.stream()
+                         .filter(predicate)
+                         .collect(Collectors.toList());
+    }
+
+    public List<Pair<A, B>> sort(Comparator<Pair<A, B>> comparator) {
+        // Sắp xếp danh sách nội bộ
+        this.pairs.sort(comparator);
+        // Trả về một bản sao của danh sách đã sắp xếp (hoặc chính nó)
+        // Dựa vào ví dụ, các thao tác sau đó (GroupByFirst) sẽ dùng danh sách đã được sắp xếp này.
+        return new ArrayList<>(this.pairs); // Trả về bản sao để in, danh sách nội bộ đã được sắp xếp.
+    }
+
+    public Map<A, List<B>> groupByFirst() {
+        // Sử dụng TreeMap để đảm bảo các key (first) được sắp xếp theo thứ tự tự nhiên.
+        // Collectors.toList() sẽ duy trì thứ tự của các 'second' trong mỗi nhóm
+        // theo thứ tự chúng xuất hiện trong danh sách 'pairs' hiện tại.
+        return this.pairs.stream()
+                .collect(Collectors.groupingBy(
+                        Pair::getFirst,
+                        TreeMap::new, // Supplier cho Map, đảm bảo key được sắp xếp
+                        Collectors.mapping(Pair::getSecond, Collectors.toList())
+                ));
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int numTestCases = Integer.parseInt(sc.nextLine()); // Luôn bằng 1
+
+        // Với bài toán này, các lệnh cụ thể chỉ định kiểu String và Integer
+        PairManager<String, Integer> manager = new PairManager<>();
+
+        String line;
+        while (!(line = sc.nextLine()).equals("End")) {
+            String[] parts = line.split(" ");
+            String command = parts[0];
+
+            switch (command) {
+                case "AddPairStringInt":
+                    // AddPairStringInt s x
+                    String sAdd = parts[1];
+                    int xAdd = Integer.parseInt(parts[2]);
+                    manager.add(new Pair<>(sAdd, xAdd));
+                    break;
+                case "RemovePairStringInt":
+                    // RemovePairStringInt s x
+                    String sRemove = parts[1];
+                    int xRemove = Integer.parseInt(parts[2]);
+                    manager.remove(new Pair<>(sRemove, xRemove));
+                    break;
+                case "FilterPairFirstEquals":
+                    // FilterPairFirstEquals s
+                    String sFilter = parts[1];
+                    Predicate<Pair<String, Integer>> filterPredicate = p -> p.getFirst().equals(sFilter);
+                    List<Pair<String, Integer>> filteredPairs = manager.filter(filterPredicate);
+                    for (Pair<String, Integer> p : filteredPairs) {
+                        System.out.println(p);
+                    }
+                    break;
+                case "SortPairBySecondAsc":
+                    // SortPairBySecondAsc
+                    Comparator<Pair<String, Integer>> sortComparator = Comparator.comparingInt(Pair::getSecond);
+                    // manager.sort() sắp xếp danh sách nội bộ và trả về một bản sao/tham chiếu
+                    List<Pair<String, Integer>> sortedPairs = manager.sort(sortComparator);
+                    for (Pair<String, Integer> p : sortedPairs) {
+                        System.out.println(p);
+                    }
+                    break;
+                case "GroupByFirst":
+                    // GroupByFirst
+                    Map<String, List<Integer>> groupedMap = manager.groupByFirst();
+                    for (Map.Entry<String, List<Integer>> entry : groupedMap.entrySet()) {
+                        System.out.print(entry.getKey() + ":");
+                        List<Integer> values = entry.getValue();
+                        for (Integer val : values) {
+                            System.out.print(" " + val);
+                        }
+                        System.out.println();
+                    }
+                    break;
+                default:
+                    // Bỏ qua các lệnh không xác định (theo đề bài không có)
+                    break;
+            }
+        }
+        sc.close();
+    }
+}
