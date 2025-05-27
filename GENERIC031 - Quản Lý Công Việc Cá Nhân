@@ -1,0 +1,294 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+// Task class
+class Task {
+    private int id;
+    private String description;
+    private boolean completed;
+    private int priority; // 1-High, 2-Medium, 3-Low
+
+    // Constructor: Task(int id, String description)
+    public Task(int id, String description) {
+        this.id = id;
+        this.description = description;
+        this.completed = false;
+        this.priority = 2; // Default Medium
+    }
+
+    // Constructor: Task(int id, String description, int priority)
+    public Task(int id, String description, int priority) {
+        this.id = id;
+        this.description = description;
+        this.completed = false;
+        // Initialize to a default, then use setter to apply validation logic.
+        // If 'priority' is invalid, 'this.priority' will remain the default (2).
+        // TaskManager.addTaskWithPriority already validates, so 'priority' here will be valid.
+        // This makes the constructor itself more robust if used independently.
+        this.priority = 2; // Default to Medium
+        setPriority(priority); // Apply passed priority if valid
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    public void setPriority(int priority) {
+        if (priority >= 1 && priority <= 3) {
+            this.priority = priority;
+        }
+        // No error message from setter itself as per spec.
+    }
+
+    private String getPriorityText() {
+        switch (this.priority) {
+            case 1: return "High";
+            case 2: return "Medium";
+            case 3: return "Low";
+            default: return "Unknown"; 
+        }
+    }
+
+    private String getStatusText() {
+        return this.completed ? "Completed" : "Pending";
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + id +
+               ", Desc: " + description +
+               ", Priority: " + getPriorityText() +
+               ", Status: " + getStatusText();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+}
+
+// TaskManager class
+class TaskManager {
+    private List<Task> tasks;
+    private int nextTaskId;
+
+    public TaskManager() {
+        this.tasks = new ArrayList<>();
+        this.nextTaskId = 1;
+    }
+
+    private Optional<Task> findTaskById(int taskId) {
+        return tasks.stream().filter(task -> task.getId() == taskId).findFirst();
+    }
+
+    private String getPriorityAsText(int priority) {
+        switch (priority) {
+            case 1: return "High";
+            case 2: return "Medium";
+            case 3: return "Low";
+            default: return "Invalid"; // Should not be used for valid priorities
+        }
+    }
+
+    public void addTask(String description) {
+        Task newTask = new Task(nextTaskId++, description); // Uses default priority 2
+        tasks.add(newTask);
+    }
+
+    public void addTaskWithPriority(String description, int priority) {
+        if (priority < 1 || priority > 3) {
+            System.out.println("ERROR: Invalid priority. Task not added.");
+            return;
+        }
+        Task newTask = new Task(nextTaskId++, description, priority);
+        tasks.add(newTask);
+    }
+
+    public void completeTask(int taskId) {
+        Optional<Task> taskOpt = findTaskById(taskId);
+        if (taskOpt.isPresent()) {
+            taskOpt.get().setCompleted(true);
+        } else {
+            System.out.println("ERROR: Task ID " + taskId + " not found.");
+        }
+    }
+
+    public void setTaskPriority(int taskId, int newPriority) {
+        Optional<Task> taskOpt = findTaskById(taskId);
+        if (!taskOpt.isPresent()) {
+            System.out.println("ERROR: Task ID " + taskId + " not found.");
+            return;
+        }
+        if (newPriority < 1 || newPriority > 3) {
+            System.out.println("ERROR: Invalid priority value for Task ID " + taskId + ".");
+            return; 
+        }
+        taskOpt.get().setPriority(newPriority);
+    }
+
+    public void getTaskDetails(int taskId) {
+        Optional<Task> taskOpt = findTaskById(taskId);
+        if (taskOpt.isPresent()) {
+            System.out.println(taskOpt.get().toString());
+        } else {
+            System.out.println("ERROR: Task ID " + taskId + " not found.");
+        }
+    }
+
+    public void listTasks(String statusFilter) {
+        List<Task> filteredTasks;
+        if (statusFilter.equals("Pending")) {
+            filteredTasks = tasks.stream().filter(task -> !task.isCompleted()).collect(Collectors.toList());
+        } else if (statusFilter.equals("Completed")) {
+            filteredTasks = tasks.stream().filter(Task::isCompleted).collect(Collectors.toList());
+        } else if (statusFilter.equals("All")) {
+            filteredTasks = new ArrayList<>(tasks); 
+        } else {
+            // This case should ideally not be reached if input guarantees valid filter strings.
+            // For robustness, though problem statement implies valid filters.
+            System.out.println("INFO: Invalid status filter '" + statusFilter + "'. Task list not shown.");
+            return;
+        }
+
+        if (filteredTasks.isEmpty()) {
+            System.out.println("INFO: No tasks found for status '" + statusFilter + "'.");
+        } else {
+            for (Task task : filteredTasks) {
+                System.out.println(task.toString());
+            }
+        }
+    }
+
+    public void listTasksByPriority(int priorityFilter) {
+        if (priorityFilter < 1 || priorityFilter > 3) {
+            System.out.println("ERROR: Invalid priority filter value.");
+            return;
+        }
+
+        List<Task> filteredTasks = tasks.stream()
+                                        .filter(task -> task.getPriority() == priorityFilter)
+                                        .collect(Collectors.toList());
+
+        if (filteredTasks.isEmpty()) {
+            System.out.println("INFO: No tasks found with priority " + getPriorityAsText(priorityFilter) + ".");
+        } else {
+            for (Task task : filteredTasks) {
+                System.out.println(task.toString());
+            }
+        }
+    }
+}
+
+// Main class
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        // int numTestCases = Integer.parseInt(sc.nextLine()); // Always 1 as per problem
+
+        // Reading the first line which is the number of test cases (always 1)
+        // but not using the value if it's fixed. If it's truly always 1,
+        // we can just consume it. If it might vary for other tests, use it.
+        // For now, just consume it.
+        if (sc.hasNextLine()) {
+             sc.nextLine(); // Consume the '1'
+        }
+
+
+        TaskManager manager = new TaskManager();
+
+        String line;
+        while (sc.hasNextLine() && !(line = sc.nextLine()).equals("End")) {
+            String[] parts = line.split(" ");
+            if (parts.length == 0 || parts[0].isEmpty()) { // Handle empty lines if any
+                continue;
+            }
+            String command = parts[0];
+
+            try {
+                switch (command) {
+                    case "AddTask":
+                        if (parts.length < 2) {
+                             System.out.println("ERROR: Missing description for AddTask: " + line);
+                             break;
+                        }
+                        String descAdd = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
+                        manager.addTask(descAdd);
+                        break;
+                    case "AddTaskWithPriority":
+                        if (parts.length < 3) { 
+                             System.out.println("ERROR: Missing arguments for AddTaskWithPriority: " + line);
+                             break;
+                        }
+                        int priorityAdd = Integer.parseInt(parts[parts.length - 1]);
+                        String descAddP = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length - 1));
+                        if (descAddP.isEmpty() && parts.length -1 == 1) { // Case: "AddTaskWithPriority 1" (no desc)
+                            // This check might be too specific, String.join will handle empty array from copyOfRange
+                            // If copyOfRange(parts,1,1) occurs (e.g. AddTaskWithPriority 1), it's an empty array.
+                            // String.join(" ", new String[]{}) == ""
+                            // This seems fine.
+                        }
+                        manager.addTaskWithPriority(descAddP, priorityAdd);
+                        break;
+                    case "CompleteTask":
+                        int taskIdComplete = Integer.parseInt(parts[1]);
+                        manager.completeTask(taskIdComplete);
+                        break;
+                    case "SetTaskPriority":
+                        int taskIdSetP = Integer.parseInt(parts[1]);
+                        int newPrioritySetP = Integer.parseInt(parts[2]);
+                        manager.setTaskPriority(taskIdSetP, newPrioritySetP);
+                        break;
+                    case "GetTaskDetails":
+                        int taskIdGet = Integer.parseInt(parts[1]);
+                        manager.getTaskDetails(taskIdGet);
+                        break;
+                    case "ListTasks":
+                        String statusFilter = parts[1];
+                        manager.listTasks(statusFilter);
+                        break;
+                    case "ListTasksByPriority":
+                        int priorityFilter = Integer.parseInt(parts[1]);
+                        manager.listTasksByPriority(priorityFilter);
+                        break;
+                    default:
+                        // System.out.println("Unknown command: " + command); // No output for unknown commands per spec
+                        break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("ERROR: Invalid number format in command: " + line);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                System.out.println("ERROR: Missing arguments for command: " + line);
+            }
+        }
+        sc.close();
+    }
+}
