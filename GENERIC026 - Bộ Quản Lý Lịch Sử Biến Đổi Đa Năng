@@ -1,0 +1,181 @@
+import java.util.*;
+import java.util.stream.Collectors;
+
+interface Operation<T> {
+    List<T> apply(List<T> input);
+    List<T> undo(List<T> input);
+}
+
+class HistoryManager<T> {
+    private Stack<List<T>> undoStack = new Stack<>();
+    private Stack<List<T>> redoStack = new Stack<>();
+    private List<T> current;
+
+    public void init(List<T> initial) {
+        current = new ArrayList<>(initial);
+        undoStack.clear();
+        redoStack.clear();
+    }
+
+    public void applyOperation(Operation<T> op) {
+        undoStack.push(new ArrayList<>(current));
+        redoStack.clear();
+        current = op.apply(current);
+    }
+
+    public void undo() {
+        if (!undoStack.isEmpty()) {
+            redoStack.push(new ArrayList<>(current));
+            current = undoStack.pop();
+        }
+    }
+
+    public void redo() {
+        if (!redoStack.isEmpty()) {
+            undoStack.push(new ArrayList<>(current));
+            current = redoStack.pop();
+        }
+    }
+
+    public List<T> getCurrent() {
+        return current;
+    }
+}
+
+// Đảo ngược danh sách
+class ReverseOperation<T> implements Operation<T> {
+    @Override
+    public List<T> apply(List<T> input) {
+        List<T> result = new ArrayList<>(input);
+        Collections.reverse(result);
+        return result;
+    }
+
+    @Override
+    public List<T> undo(List<T> input) {
+        // Undo đảo ngược = đảo ngược lại
+        return apply(input);
+    }
+}
+
+// Sắp xếp danh sách tăng dần (yêu cầu T extends Comparable)
+class SortOperation<T extends Comparable<T>> implements Operation<T> {
+    @Override
+    public List<T> apply(List<T> input) {
+        List<T> result = new ArrayList<>(input);
+        Collections.sort(result);
+        return result;
+    }
+
+    @Override
+    public List<T> undo(List<T> input) {
+        // Undo sắp xếp thì không rõ trạng thái cũ nên không dùng
+        // Ở đây không cần gọi undo vì HistoryManager lưu trạng thái trước apply rồi
+        return input;
+    }
+}
+
+// Thêm phần tử vào cuối danh sách
+class AddElementOperation<T> implements Operation<T> {
+    private T element;
+
+    public AddElementOperation(T element) {
+        this.element = element;
+    }
+
+    @Override
+    public List<T> apply(List<T> input) {
+        List<T> result = new ArrayList<>(input);
+        result.add(element);
+        return result;
+    }
+
+    @Override
+    public List<T> undo(List<T> input) {
+        List<T> result = new ArrayList<>(input);
+        if (!result.isEmpty()) result.remove(result.size() - 1);
+        return result;
+    }
+}
+
+// Xóa phần tử cuối cùng danh sách
+class RemoveElementOperation<T> implements Operation<T> {
+    private T removedElement = null;
+
+    @Override
+    public List<T> apply(List<T> input) {
+        List<T> result = new ArrayList<>(input);
+        if (!result.isEmpty()) {
+            removedElement = result.remove(result.size() - 1);
+        }
+        return result;
+    }
+
+    @Override
+    public List<T> undo(List<T> input) {
+        List<T> result = new ArrayList<>(input);
+        if (removedElement != null) {
+            result.add(removedElement);
+        }
+        return result;
+    }
+}
+
+// Main xử lý lệnh
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        sc.nextLine(); // đọc số test case (luôn 1)
+
+        HistoryManager<Integer> manager = new HistoryManager<>();
+
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine().trim();
+            if (line.equals("End")) break;
+            String[] tokens = line.split(" ");
+
+            switch (tokens[0]) {
+                case "InitIntList":
+                    int n = Integer.parseInt(tokens[1]);
+                    List<Integer> initList = new ArrayList<>();
+                    for (int i = 0; i < n; i++) {
+                        initList.add(Integer.parseInt(tokens[2 + i]));
+                    }
+                    manager.init(initList);
+                    break;
+
+                case "Reverse":
+                    manager.applyOperation(new ReverseOperation<>());
+                    break;
+
+                case "Sort":
+                    manager.applyOperation(new SortOperation<>());
+                    break;
+
+                case "Add":
+                    int x = Integer.parseInt(tokens[1]);
+                    manager.applyOperation(new AddElementOperation<>(x));
+                    break;
+
+                case "Remove":
+                    manager.applyOperation(new RemoveElementOperation<>());
+                    break;
+
+                case "Undo":
+                    manager.undo();
+                    break;
+
+                case "Redo":
+                    manager.redo();
+                    break;
+
+                case "Print":
+                    List<Integer> current = manager.getCurrent();
+                    System.out.println(current.stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(" ")));
+                    break;
+            }
+        }
+    }
+}
