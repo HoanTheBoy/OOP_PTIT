@@ -1,0 +1,66 @@
+import java.util.Scanner;
+
+class Pair<T> {
+    private T first;
+    private T second;
+
+    public Pair(T first, T second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    public T getFirst() {
+        return first;
+    }
+
+    public void setFirst(T first) {
+        this.first = first;
+    }
+
+    public T getSecond() {
+        return second;
+    }
+
+    public void setSecond(T second) {
+        this.second = second;
+    }
+
+    public void swap() {
+        T temp = first;
+        first = second;
+        second = temp;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int testCases = Integer.parseInt(scanner.nextLine());
+
+        for (int i = 0; i < testCases; i++) {
+            String line = scanner.nextLine();
+            String[] parts = line.trim().split("\\s+");
+
+            // Xác định kiểu dữ liệu: là số hay chuỗi
+            if (isNumeric(parts[0]) && isNumeric(parts[1])) {
+                // Sử dụng Integer
+                Integer a = Integer.parseInt(parts[0]);
+                Integer b = Integer.parseInt(parts[1]);
+                Pair<Integer> pair = new Pair<>(a, b);
+                pair.swap();
+                System.out.println(pair.getFirst() + " " + pair.getSecond());
+            } else {
+                // Sử dụng String
+                Pair<String> pair = new Pair<>(parts[0], parts[1]);
+                pair.swap();
+                System.out.println("'" + pair.getFirst() + "' '" + pair.getSecond() + "'");
+            }
+        }
+
+        scanner.close();
+    }
+
+    private static boolean isNumeric(String str) {
+        return str.matches("-?\\d+");
+    }
+}
