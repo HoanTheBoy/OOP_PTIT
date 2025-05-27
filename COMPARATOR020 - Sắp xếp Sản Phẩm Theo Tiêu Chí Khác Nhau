@@ -1,0 +1,88 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Scanner;
+
+class Product {
+    private String name;
+    private int price;
+    private int stock;
+
+    public Product(String name, int price, int stock) {
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    @Override
+    public String toString() {
+        return name + " " + price + " " + stock;
+    }
+}
+
+public class Main { // Changed class name to Main for typical contest platforms
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        int n = Integer.parseInt(scanner.nextLine());
+        List<Product> products = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            String[] parts = scanner.nextLine().split(" ");
+            String name = parts[0];
+            int price = Integer.parseInt(parts[1]);
+            int stock = Integer.parseInt(parts[2]);
+            products.add(new Product(name, price, stock));
+        }
+
+        String sortBy = scanner.nextLine();
+        Comparator<Product> comparator = null;
+
+        switch (sortBy) {
+            case "BY_NAME":
+                // Sắp xếp tăng dần theo tên.
+                comparator = Comparator.comparing(Product::getName);
+                break;
+            case "BY_PRICE":
+                // Sắp xếp tăng dần theo giá;
+                // Nếu giá bằng nhau, sắp xếp tiếp theo tên tăng dần.
+                comparator = Comparator.comparingInt(Product::getPrice)
+                                     .thenComparing(Product::getName);
+                break;
+            case "BY_STOCK":
+                // Sắp xếp giảm dần theo số lượng tồn kho;
+                // Nếu tồn kho bằng nhau, sắp xếp tiếp theo tên tăng dần.
+                comparator = Comparator.comparingInt(Product::getStock).reversed()
+                                     .thenComparing(Product::getName);
+                break;
+            default:
+                // Should not happen based on problem description
+                System.err.println("Invalid sort criteria");
+                return;
+        }
+
+        if (comparator != null) {
+            Collections.sort(products, comparator);
+        }
+
+        for (Product product : products) {
+            System.out.println(product);
+        }
+
+        scanner.close();
+    }
+}
