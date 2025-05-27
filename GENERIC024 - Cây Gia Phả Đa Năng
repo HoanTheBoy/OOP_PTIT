@@ -1,0 +1,181 @@
+import java.util.*;
+
+// Tree node generic
+class TreeNode<T> {
+    private T value;
+    private List<TreeNode<T>> children = new ArrayList<>();
+
+    public TreeNode(T value) {
+        this.value = value;
+    }
+
+    public void addChild(TreeNode<T> child) {
+        children.add(child);
+    }
+
+    public T getValue() {
+        return value;
+    }
+
+    public List<TreeNode<T>> getChildren() {
+        return children;
+    }
+}
+
+// Visitor interface
+interface NodeVisitor<T, R> {
+    R visit(TreeNode<T> node);
+}
+
+// Person class
+class Person {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+
+    @Override
+    public String toString() {
+        return name + " " + age;
+    }
+}
+
+// Count visitor
+class CountPersonVisitor implements NodeVisitor<Person, Integer> {
+    @Override
+    public Integer visit(TreeNode<Person> node) {
+        int count = 1;
+        for (TreeNode<Person> child : node.getChildren()) {
+            count += visit(child);
+        }
+        return count;
+    }
+}
+
+// Oldest visitor
+class OldestPersonVisitor implements NodeVisitor<Person, Person> {
+    @Override
+    public Person visit(TreeNode<Person> node) {
+        Person oldest = node.getValue();
+        for (TreeNode<Person> child : node.getChildren()) {
+            Person childOldest = visit(child);
+            if (childOldest.getAge() > oldest.getAge()) {
+                oldest = childOldest;
+            }
+        }
+        return oldest;
+    }
+}
+
+// List names visitor
+class ListNamesVisitor implements NodeVisitor<Person, List<String>> {
+    @Override
+    public List<String> visit(TreeNode<Person> node) {
+        List<String> names = new ArrayList<>();
+        names.add(node.getValue().getName());
+        for (TreeNode<Person> child : node.getChildren()) {
+            names.addAll(visit(child));
+        }
+        return names;
+    }
+}
+
+// Tree utilities
+class FamilyTreeUtils {
+    public static <T, R> R traverse(TreeNode<T> root, NodeVisitor<T, R> visitor) {
+        return visitor.visit(root);
+    }
+
+    public static <T> List<T> flatten(TreeNode<T> root) {
+        List<T> result = new ArrayList<>();
+        preOrder(root, result);
+        return result;
+    }
+
+    private static <T> void preOrder(TreeNode<T> node, List<T> result) {
+        result.add(node.getValue());
+        for (TreeNode<T> child : node.getChildren()) {
+            preOrder(child, result);
+        }
+    }
+}
+
+// Main class
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        sc.nextLine(); // bỏ số test case (luôn bằng 1)
+
+        TreeNode<Person> root = null;
+
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine().trim();
+            if (line.equals("End")) break;
+
+            String[] tokens = line.split(" ");
+            String command = tokens[0];
+
+            switch (command) {
+                case "BuildFamilyTree": {
+                    int n = Integer.parseInt(tokens[1]);
+                    Map<Integer, TreeNode<Person>> nodeMap = new HashMap<>();
+                    int index = 2;
+
+                    // Đọc thông tin người
+                    for (int i = 1; i <= n; i++) {
+                        String name = tokens[index++];
+                        int age = Integer.parseInt(tokens[index++]);
+                        int k = Integer.parseInt(tokens[index++]); // số lượng con
+                        List<Integer> childrenIndices = new ArrayList<>();
+                        for (int j = 0; j < k; j++) {
+                            childrenIndices.add(Integer.parseInt(tokens[index++]));
+                        }
+
+                        TreeNode<Person> node = new TreeNode<>(new Person(name, age));
+                        nodeMap.put(i, node);
+                        node.getChildren().addAll(Collections.nCopies(k, null)); // placeholder
+                    }
+
+                    // Gán con
+                    index = 2;
+                    for (int i = 1; i <= n; i++) {
+                        index += 2; // bỏ name và age
+                        int k = Integer.parseInt(tokens[index++]);
+                        TreeNode<Person> parent = nodeMap.get(i);
+                        for (int j = 0; j < k; j++) {
+                            int childIdx = Integer.parseInt(tokens[index++]);
+                            parent.getChildren().set(j, nodeMap.get(childIdx));
+                        }
+                    }
+
+                    root = nodeMap.get(1); // người đầu tiên là gốc
+                    break;
+                }
+
+                case "CountPerson": {
+                    int count = FamilyTreeUtils.traverse(root, new CountPersonVisitor());
+                    System.out.println(count);
+                    break;
+                }
+
+                case "OldestPerson": {
+                    Person oldest = FamilyTreeUtils.traverse(root, new OldestPersonVisitor());
+                    System.out.println(oldest);
+                    break;
+                }
+
+                case "ListNames": {
+                    List<String> names = FamilyTreeUtils.traverse(root, new ListNamesVisitor());
+                    System.out.println(String.join(" ", names));
+                    break;
+                }
+            }
+        }
+    }
+}
